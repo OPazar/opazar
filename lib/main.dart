@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/dealers_page.dart';
+import 'package:opazar/screens/dealer_page.dart';
 
 
 void main() => runApp(MyApp());

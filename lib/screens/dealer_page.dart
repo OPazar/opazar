@@ -16,17 +16,28 @@ class DealerPage extends StatefulWidget {
 class _DealerPageState extends State<DealerPage> {
   var db = DatabaseService();
 
-  final dealerId = 'AXvFV6xY7Y94PeDbFyHy';
+  final dealerId = 'QFvm25W7Zrtj25Tj3DR2';
 
   @override
   Widget build(BuildContext context) {
-    var detailStream = db.streamDealer(dealerId);
+    var dealerStream = db.streamDealer(dealerId);
     var detailProvider = StreamProvider<Dealer>.value(
-      value: detailStream,
+      value: dealerStream,
       child: AsyncBuilder<Dealer>(
-        stream: detailStream,
+        stream: dealerStream,
         waiting: (context) => Text('Loading...'),
         builder: (context, value) => DealerDetails(dealer: value),
+        error: (context, error, stackTrace) => Text('Error! $error'),
+        closed: (context, value) => Text('$value (closed)'),
+      ),
+    );
+
+    var showcaseProvider = StreamProvider<Dealer>.value(
+      value: dealerStream,
+      child: AsyncBuilder<Dealer>(
+        stream: dealerStream,
+        waiting: (context) => Text('Loading...'),
+        builder: (context, value) => DealerShowcase(images:value.showcaseImageUrls),
         error: (context, error, stackTrace) => Text('Error! $error'),
         closed: (context, value) => Text('$value (closed)'),
       ),
@@ -55,39 +66,16 @@ class _DealerPageState extends State<DealerPage> {
             shrinkWrap: true,
             children: <Widget>[
               detailProvider,
-              buildDealerShowcase(),
+              showcaseProvider,
               productsProvider,
             ],
           ),
         ));
   }
-
-  Widget buildDealerShowcase() {
-    var tempImage = Container(
-      height: 150,
-      width: 150,
-      color: Colors.blue,
-    );
-
-    var showcase = SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      primary: true,
-      physics: ScrollPhysics(),
-      child: Row(
-        children: List.generate(
-            5, (_) => Container(child: tempImage, padding: EdgeInsets.only(right: 8.0))),
-      ),
-    );
-
-    return Container(
-      child: showcase,
-      padding: EdgeInsets.all(8.0),
-    );
-  }
 }
 
 class DealerDetails extends StatelessWidget {
-  Dealer dealer;
+  final Dealer dealer;
 
   DealerDetails({
     Key key,
@@ -96,6 +84,7 @@ class DealerDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(dealer.showcaseImageUrls);
     var dealerImage = CachedNetworkImage(
       imageUrl: dealer.imageUrl,
       imageBuilder: (context, imageProvider) => Container(
@@ -118,7 +107,7 @@ class DealerDetails extends StatelessWidget {
       ),
     );
     var dealerSlogan = Text(
-      'Çiftlik Sloganı',
+      dealer.slogan,
       style: TextStyle(
         fontSize: 18.0,
         fontWeight: FontWeight.w400,
@@ -158,6 +147,53 @@ class DealerDetails extends StatelessWidget {
   }
 }
 
+class DealerShowcase extends StatelessWidget {
+  final List<dynamic> images;
+
+  const DealerShowcase({
+    Key key,
+    this.images,
+  }) : super(key: key);
+
+  Widget gridViewItem(String imageUrl){
+    return Container(
+      height: 150,
+      width: 150,
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        imageBuilder: (context, imageProvider) => Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var showcase = SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      primary: true,
+      physics: ScrollPhysics(),
+      child: Row(
+        children: List.generate(images.length,
+            (index) => Container(child: gridViewItem(images[index]), padding: EdgeInsets.only(right: 8.0))),
+      ),
+    );
+
+    return Container(
+      child: showcase,
+      padding: EdgeInsets.all(8.0),
+    );
+  }
+}
+
 class DealerProducts extends StatelessWidget {
   final List<Product> products;
 
@@ -167,8 +203,6 @@ class DealerProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    products.forEach((element) => print(element.toMap()));
-
     Widget productItem(Product product) {
       return Container(
         decoration: BoxDecoration(
@@ -241,7 +275,7 @@ class DealerProducts extends StatelessWidget {
       );
     }
 
-    if (products != null && products.length>0) {
+    if (products != null && products.length > 0) {
       return GridView.count(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,

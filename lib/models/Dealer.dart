@@ -6,15 +6,19 @@ class Dealer {
 
   String name;
   String imageUrl;
+  List<dynamic> showcaseImageUrls;
+  String slogan;
   DocumentReference referance;
 
-  Dealer({uid, this.name, this.imageUrl}) : this._uid = uid;
+  Dealer({uid, this.name, this.imageUrl,this.showcaseImageUrls,this.slogan}) : this._uid = uid;
 
   factory Dealer.fromMap(Map data) {
     data = data ?? {};
     return Dealer(
       name: data['name'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
+      showcaseImageUrls: data['showcaseImageUrls'] ?? [],
+      slogan: data['slogan'] ?? '',
     );
   }
 
@@ -24,6 +28,8 @@ class Dealer {
       uid: snapshot.documentID ?? '',
       name: data['name'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
+      showcaseImageUrls: data['showcaseImageUrls'] ?? [],
+      slogan: data['slogan'] ?? '',
     );
   }
 
@@ -31,6 +37,8 @@ class Dealer {
     return {
       'name': name,
       'imageUrl': imageUrl,
+      'showcaseImageUrls': showcaseImageUrls,
+      'slogan': slogan,
     };
   }
 }

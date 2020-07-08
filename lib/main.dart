@@ -3,7 +3,7 @@ import 'package:opazar/screens/dealer_page.dart';
 
 
 void main() => runApp(MyApp());
-
+// deneme yeni
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

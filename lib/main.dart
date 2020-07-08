@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:opazar/screens/dealers_page.dart';
 
 
-
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -12,7 +10,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blueGrey),
-      home: SallersPage(),
+      home: DealerPage(),
     );
   }
 }

@@ -5,8 +5,6 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:opazar/screens/dealers_page.dart';
 
 
-
-
 class ProductPage extends StatefulWidget {
   @override
   _ProductPageState createState() => _ProductPageState();
@@ -59,7 +57,7 @@ class _ProductPageState extends State<ProductPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SallersPage()),
+                                  builder: (context) => DealerPage()),
                             );
                           },
                         ),

@@ -5,11 +5,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:opazar/screens/product_page.dart';
 
-class SallersPage extends StatelessWidget {
+class DealerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

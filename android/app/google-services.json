@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "272402882358",
+    "firebase_url": "https://orgeneral-47dfa.firebaseio.com",
+    "project_id": "orgeneral-47dfa",
+    "storage_bucket": "orgeneral-47dfa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272402882358:android:56bebb223b0496ab48dd97",
+        "android_client_info": {
+          "package_name": "com.emin.orgeneral"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "272402882358-3ao3en20sc87r48ul6p5paag70d2jh0u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlMCL5DRduVya7A4GgkJ626xfuGC232DA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "272402882358-3ao3en20sc87r48ul6p5paag70d2jh0u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272402882358:android:b851d1ebc4ebe88c48dd97",
+        "android_client_info": {
+          "package_name": "com.opazar.opazar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "272402882358-3ao3en20sc87r48ul6p5paag70d2jh0u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlMCL5DRduVya7A4GgkJ626xfuGC232DA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "272402882358-3ao3en20sc87r48ul6p5paag70d2jh0u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

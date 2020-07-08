@@ -1,10 +1,49 @@
+import 'package:async_builder/async_builder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
-class DealerPage extends StatelessWidget {
+import 'package:opazar/models/Dealer.dart';
+import 'package:opazar/models/Product.dart';
+import 'package:opazar/services/db.dart';
+
+class DealerPage extends StatefulWidget {
+  @override
+  _DealerPageState createState() => _DealerPageState();
+}
+
+class _DealerPageState extends State<DealerPage> {
+  var db = DatabaseService();
+
+  final dealerId = 'AXvFV6xY7Y94PeDbFyHy';
+
   @override
   Widget build(BuildContext context) {
+    var detailStream = db.streamDealer(dealerId);
+    var detailProvider = StreamProvider<Dealer>.value(
+      value: detailStream,
+      child: AsyncBuilder<Dealer>(
+        stream: detailStream,
+        waiting: (context) => Text('Loading...'),
+        builder: (context, value) => DealerDetails(dealer: value),
+        error: (context, error, stackTrace) => Text('Error! $error'),
+        closed: (context, value) => Text('$value (closed)'),
+      ),
+    );
+
+    var productsStream = db.streamProducts(dealerId);
+    var productsProvider = StreamProvider<List<Product>>.value(
+      value: productsStream,
+      child: AsyncBuilder<List<Product>>(
+        stream: productsStream,
+        waiting: (context) => Text('Loading...'),
+        builder: (context, value) => DealerProducts(products: value),
+        error: (context, error, stackTrace) => Text('Error! $error'),
+        closed: (context, value) => Text('$value (closed)'),
+      ),
+    );
+
     return Scaffold(
         // backgroundColor: Colors.lightGreen,
         appBar: AppBar(
@@ -15,17 +54,50 @@ class DealerPage extends StatelessWidget {
             physics: ScrollPhysics(),
             shrinkWrap: true,
             children: <Widget>[
-              buildDealerDetails(),
+              detailProvider,
               buildDealerShowcase(),
-              buildDealerProducts(),
+              productsProvider,
             ],
           ),
         ));
   }
 
-  Widget buildDealerDetails() {
+  Widget buildDealerShowcase() {
+    var tempImage = Container(
+      height: 150,
+      width: 150,
+      color: Colors.blue,
+    );
+
+    var showcase = SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      primary: true,
+      physics: ScrollPhysics(),
+      child: Row(
+        children: List.generate(
+            5, (_) => Container(child: tempImage, padding: EdgeInsets.only(right: 8.0))),
+      ),
+    );
+
+    return Container(
+      child: showcase,
+      padding: EdgeInsets.all(8.0),
+    );
+  }
+}
+
+class DealerDetails extends StatelessWidget {
+  Dealer dealer;
+
+  DealerDetails({
+    Key key,
+    this.dealer,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     var dealerImage = CachedNetworkImage(
-      imageUrl: "http://via.placeholder.com/200x150",
+      imageUrl: dealer.imageUrl,
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -39,7 +111,7 @@ class DealerPage extends StatelessWidget {
     );
 
     var dealerName = Text(
-      'Çiftlik Adı',
+      dealer.name,
       style: TextStyle(
         fontSize: 32.0,
         fontWeight: FontWeight.w600,
@@ -75,7 +147,6 @@ class DealerPage extends StatelessWidget {
         ],
       ),
     );
-
     return Column(
       children: <Widget>[
         Container(height: 250.0, width: double.infinity, color: Colors.blue, child: dealerImage),
@@ -85,28 +156,21 @@ class DealerPage extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget buildDealerShowcase() {
-    var tempImage = Container(
-      height: 150,
-      width: 150,
-      color: Colors.blue,
-    );
+class DealerProducts extends StatelessWidget {
+  final List<Product> products;
 
-    var showcase = SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      primary: true,
-      physics: ScrollPhysics(),
-      child: Row(
-        children: List.generate(5, (_) => Container(child: tempImage,padding: EdgeInsets.only(right: 8.0))),
-      ),
-    );
+  const DealerProducts({
+    this.products,
+  });
 
-    return Container(child: showcase,padding: EdgeInsets.all(8.0),);
-  }
+  @override
+  Widget build(BuildContext context) {
+    products.forEach((element) => print(element.toMap()));
 
-  Widget buildDealerProducts(){
-    var productItem = Container(
+    Widget productItem(Product product) {
+      return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(10)),
           color: Colors.grey[350],
@@ -114,7 +178,7 @@ class DealerPage extends StatelessWidget {
         height: 250.0,
         margin: EdgeInsets.all(8.0),
         child: RawMaterialButton(
-          onPressed: () {  },
+          onPressed: () {},
           child: Container(
             padding: EdgeInsets.all(8.0),
             child: Column(
@@ -123,7 +187,7 @@ class DealerPage extends StatelessWidget {
                 Container(
                   height: 130,
                   child: CachedNetworkImage(
-                    imageUrl: 'http://via.placeholder.com/200x150',
+                    imageUrl: product.imageUrl,
                     imageBuilder: (context, imageProvider) => Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
@@ -150,8 +214,8 @@ class DealerPage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text('Ürün Adı'),
-                            Text('kg 5₺'),
+                            Text(product.name),
+                            Text('${product.unit} ${product.price} ₺'),
                           ],
                         ),
                         Row(
@@ -175,15 +239,20 @@ class DealerPage extends StatelessWidget {
           ),
         ),
       );
-    
-    return GridView.count(
+    }
+
+    if (products != null && products.length>0) {
+      return GridView.count(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         primary: false,
         padding: EdgeInsets.all(4.0),
         crossAxisCount: 2,
         childAspectRatio: (8 / 9),
-        children: List.generate(5, (index) => productItem),
+        children: List.generate(products.length, (index) => productItem(products[index])),
       );
+    } else {
+      return Text('enought product');
+    }
   }
 }

@@ -38,7 +38,8 @@ class _DealerPageState extends State<DealerPage> {
       child: AsyncBuilder<Dealer>(
         stream: dealerStream,
         waiting: (context) => Text('Loading...'),
-        builder: (context, value) => DealerShowcase(images: value.showcaseImageUrls),
+        builder: (context, value) =>
+            DealerShowcase(images: value.showcaseImageUrls),
         error: (context, error, stackTrace) => Text('Error! $error'),
         closed: (context, value) => Text('$value (closed)'),
       ),
@@ -113,31 +114,49 @@ class DealerDetails extends StatelessWidget {
     var dealerRate = Container(
       padding: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            'Değerlendirmeler',
-            style: TextStyle(fontSize: 18.0),
-          ),
-          Row(
-            children: <Widget>[
-              Text(
-                '5',
-                style: TextStyle(fontSize: 18.0),
-              ),
-              Icon(Icons.star, color: Colors.yellow[800], size: 32.0),
-            ],
-          ),
-        ],
+      child: GestureDetector(
+        onTap: () {
+          _settingModalBottomSheet(context);
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(
+              'Yorumlar',
+              style: TextStyle(fontSize: 18.0),
+            ),
+            Row(
+              children: <Widget>[
+                Text(
+                  '5',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                Icon(Icons.star, color: Colors.yellow[800], size: 32.0),
+              ],
+            ),
+          ],
+        ),
       ),
     );
     return Column(
       children: <Widget>[
-        Container(height: 250.0, width: double.infinity, color: Colors.blue, child: dealerImage),
-        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerName),
-        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerSlogan),
-        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerRate),
+        Container(
+            height: 250.0,
+            width: double.infinity,
+            color: Colors.blue,
+            child: dealerImage),
+        Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(8.0),
+            child: dealerName),
+        Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(8.0),
+            child: dealerSlogan),
+        Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(8.0),
+            child: dealerRate),
       ],
     );
   }
@@ -165,7 +184,8 @@ class DealerShowcase extends StatelessWidget {
             ),
           ),
         ),
-        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+        placeholder: (context, url) =>
+            Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ),
     );
@@ -181,7 +201,8 @@ class DealerShowcase extends StatelessWidget {
         children: List.generate(
             images.length,
             (index) => Container(
-                child: gridViewItem(images[index]), padding: EdgeInsets.only(right: 8.0))),
+                child: gridViewItem(images[index]),
+                padding: EdgeInsets.only(right: 8.0))),
       ),
     );
 
@@ -198,6 +219,7 @@ class DealerProducts extends StatelessWidget {
   const DealerProducts({
     this.products,
   });
+
   @override
   Widget build(BuildContext context) {
     Widget productItem(Product product) {
@@ -232,7 +254,8 @@ class DealerProducts extends StatelessWidget {
                       ),
                       // height: 130,
                     ),
-                    placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                    placeholder: (context, url) =>
+                        Center(child: CircularProgressIndicator()),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                   ),
                 ),
@@ -256,7 +279,8 @@ class DealerProducts extends StatelessWidget {
                             Row(
                               children: <Widget>[
                                 Text('5'),
-                                Icon(Icons.star, size: 20, color: Colors.yellow[800]),
+                                Icon(Icons.star,
+                                    size: 20, color: Colors.yellow[800]),
                               ],
                             )
                           ],
@@ -280,7 +304,8 @@ class DealerProducts extends StatelessWidget {
         padding: EdgeInsets.all(4.0),
         crossAxisCount: 2,
         childAspectRatio: (8 / 9),
-        children: List.generate(products.length, (index) => productItem(products[index])),
+        children: List.generate(
+            products.length, (index) => productItem(products[index])),
       );
     } else {
       return Text('enought product');
@@ -291,7 +316,9 @@ class DealerProducts extends StatelessWidget {
 class CommitCard extends StatelessWidget {
   final Comment comment;
 
-  CommitCard(this.comment);
+  CommitCard(
+    this.comment,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -316,11 +343,60 @@ class CommitCard extends StatelessWidget {
                 maxLines: 2,
               ),
               decoration: BoxDecoration(
-                  color: Colors.greenAccent, borderRadius: BorderRadius.all(Radius.circular(10))),
+                  color: Colors.greenAccent,
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             )
           ],
         )
       ],
     );
   }
+}
+
+void _settingModalBottomSheet(context) {
+  List<Comment> comments = List<Comment>();
+   db.streamDealerComments('AXvFV6xY7Y94PeDbFyHy').listen((event) {
+    comments = event;
+  });
+
+  showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Wrap(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(2),
+              child: TextFormField(
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(30),
+                ],
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  filled: true,
+                  icon: Icon(Icons.comment),
+                  hintText: '',
+                  labelText: 'Yorum Yap',
+                ),
+                onSaved: (String value) {},
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(5),
+              height: 300,
+              padding: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.greenAccent, width: 2.0),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: ListView(
+                children: List.generate(
+                    comments.length,
+                    (index) => CommitCard(
+                          comments[index],
+                        )),
+              ),
+            ),
+          ],
+        );
+      });
 }

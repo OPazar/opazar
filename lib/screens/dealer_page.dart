@@ -56,10 +56,6 @@ class _DealerPageState extends State<DealerPage> {
     );
 
     return Scaffold(
-        // backgroundColor: Colors.lightGreen,
-        appBar: AppBar(
-          title: Text("ÇiftlikName"),
-        ),
         body: Container(
           child: ListView(
             physics: ScrollPhysics(),

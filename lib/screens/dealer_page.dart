@@ -19,7 +19,6 @@ var db = DatabaseService();
 final dealerId = 'QFvm25W7Zrtj25Tj3DR2';
 
 class _DealerPageState extends State<DealerPage> {
-
   @override
   Widget build(BuildContext context) {
     var dealerStream = db.streamDealer(dealerId);
@@ -114,7 +113,7 @@ class DealerDetails extends StatelessWidget {
 
     var dealerRate = RawMaterialButton(
       onPressed: () {
-      var commentsStream = db.streamDealerComments(dealerId);
+        var commentsStream = db.streamDealerComments(dealerId);
         return StreamProvider<List<Comment>>.value(
           value: commentsStream,
           child: AsyncBuilder<List<Comment>>(

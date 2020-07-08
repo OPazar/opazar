@@ -110,41 +110,26 @@ class DealerDetails extends StatelessWidget {
       ),
     );
 
-    var dealerRate = RawMaterialButton(
-      onPressed: () {
-        var commentsStream = db.streamDealerComments(dealerId);
-        return StreamProvider<List<Comment>>.value(
-          value: commentsStream,
-          child: AsyncBuilder<List<Comment>>(
-            stream: commentsStream,
-            waiting: (context) => Text('Loading...'),
-            builder: (context, value) => _commentsBottomSheet(context, value),
-            error: (context, error, stackTrace) => Text('Error! $error'),
-            closed: (context, value) => Text('$value (closed)'),
+    var dealerRate = Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            'Değerlendirmeler',
+            style: TextStyle(fontSize: 18.0),
           ),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              'Değerlendirmeler',
-              style: TextStyle(fontSize: 18.0),
-            ),
-            Row(
-              children: <Widget>[
-                Text(
-                  '5',
-                  style: TextStyle(fontSize: 18.0),
-                ),
-                Icon(Icons.star, color: Colors.yellow[800], size: 32.0),
-              ],
-            ),
-          ],
-        ),
+          Row(
+            children: <Widget>[
+              Text(
+                '5',
+                style: TextStyle(fontSize: 18.0),
+              ),
+              Icon(Icons.star, color: Colors.yellow[800], size: 32.0),
+            ],
+          ),
+        ],
       ),
     );
     return Column(
@@ -301,45 +286,6 @@ class DealerProducts extends StatelessWidget {
       return Text('enought product');
     }
   }
-}
-
-_commentsBottomSheet(context, List<Comment> comments) {
-  showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        return Wrap(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(2),
-              child: TextFormField(
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(30),
-                ],
-                decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.comment),
-                  hintText: '',
-                  labelText: 'Yorum Yap',
-                ),
-                onSaved: (String value) {},
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.all(5),
-              height: 300,
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.greenAccent, width: 2.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: ListView(
-                children: List.generate(comments.length, (index) => CommitCard(comments[index])),
-              ),
-            ),
-          ],
-        );
-      });
 }
 
 class CommitCard extends StatelessWidget {

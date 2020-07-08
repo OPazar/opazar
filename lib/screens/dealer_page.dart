@@ -81,7 +81,6 @@ class DealerDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(dealer.showcaseImageUrls);
     var dealerImage = CachedNetworkImage(
       imageUrl: dealer.imageUrl,
       imageBuilder: (context, imageProvider) => Container(
@@ -214,8 +213,6 @@ class DealerProducts extends StatelessWidget {
   const DealerProducts({
     this.products,
   });
-//deneme 321
-//deneme543
   @override
   Widget build(BuildContext context) {
     Widget productItem(Product product) {

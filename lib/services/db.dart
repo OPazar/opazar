@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
+import 'package:opazar/models/User.dart';
 
 class DatabaseService {
   final Firestore _db = Firestore.instance;
@@ -57,5 +58,13 @@ class DatabaseService {
     .collection('comments');
     return ref.snapshots().map((list) => 
         list.documents.map((snapshot) => Comment.fromSnapshot(snapshot)).toList());
+  }
+
+  //get user
+  Stream<User> streamUser(String userUid){
+    var ref = _db
+    .collection('users')
+    .document(userUid);
+    return ref.snapshots().map((snapshot) => User.fromSnapshot(snapshot));
   }
 }

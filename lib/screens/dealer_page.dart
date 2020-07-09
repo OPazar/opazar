@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:opazar/main.dart';
 import 'package:provider/provider.dart';
 
 import 'package:opazar/models/Comment.dart';
@@ -10,6 +11,7 @@ import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/services/db.dart';
+import 'package:opazar/services/auth.dart';
 
 class DealerPage extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class DealerPage extends StatefulWidget {
 }
 
 var db = DatabaseService();
+var auth = AuthService();
 final dealerId = 'QFvm25W7Zrtj25Tj3DR2';
 
 class _DealerPageState extends State<DealerPage> {
@@ -216,7 +219,10 @@ class DealerProducts extends StatelessWidget {
         height: 250.0,
         margin: EdgeInsets.all(8.0),
         child: RawMaterialButton(
-          onPressed: () {},
+          onPressed: () {
+            auth.signOut(); // deneme amaçlı yapıldı
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
+          },
           child: Container(
             padding: EdgeInsets.all(8.0),
             child: Column(

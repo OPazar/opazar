@@ -1,6 +1,7 @@
 import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/register_page.dart';
 import 'package:opazar/services/auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -79,6 +80,13 @@ class _LoginPageState extends State<LoginPage> {
               password,
               SizedBox(height: 24.0),
               submitButton,
+              SizedBox(height: 8.0),
+              Center(
+                  child: GestureDetector(
+                child: Text('Buraya tıklayarak kayıt olabilirsin'),
+                onTap: () => Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (context) => RegisterPage())),
+              )),
             ],
           ),
         ),
@@ -91,9 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       print('validated');
       _formKey.currentState.save();
       //onayla
-      auth.login(email: emailValue, password: passwordValue)
-      .catchError((error) {})
-      .then((value) {
+      auth.login(email: emailValue, password: passwordValue).catchError((error) {}).then((value) {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(

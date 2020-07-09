@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/login_page.dart';
+import 'package:opazar/services/auth.dart';
 
 class RegisterPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -7,6 +10,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final auth = AuthService();
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _agreedToTOS = false;
   bool _autoValidate = false;
@@ -146,6 +151,13 @@ class _RegisterPageState extends State<RegisterPage> {
               checkBox,
               SizedBox(height: 24.0),
               submitButton,
+              SizedBox(height: 8.0),
+              Center(
+                  child: GestureDetector(
+                child: Text('Buraya tıklayarak giriş yapabilirsin'),
+                onTap: () => Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (context) => LoginPage())),
+              )),
             ],
           ),
         ),
@@ -157,7 +169,11 @@ class _RegisterPageState extends State<RegisterPage> {
     if (_formKey.currentState.validate()) {
       print('validated');
       _formKey.currentState.save();
-      print('{name: $nameValue, sureName: $sureNameValue, email: $emailValue, password: $passwordValue}');
+      auth
+          .register(
+              email: emailValue, password: passwordValue, name: nameValue, sureName: sureNameValue)
+          .then((value) => Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => DealerPage())));
     } else {
       print('unValidated');
       setState(() {

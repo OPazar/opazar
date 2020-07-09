@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:opazar/screens/login_page.dart';
-=======
 import 'package:opazar/screens/dealer_page.dart';
->>>>>>> 849b1b4979221459fe70eba8452142aa77416be4
 
 
 void main() => runApp(MyApp());

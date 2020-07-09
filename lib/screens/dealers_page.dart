@@ -264,7 +264,7 @@ class FotoCard extends StatelessWidget {
 }
 
 class CommitCard extends StatelessWidget {
-  Comment comment;
+  final Comment comment;
 
   CommitCard(this.comment);
 

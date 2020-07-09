@@ -27,6 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      // ignore: missing_return
       validator: (String value) {
         if (value.trim().isEmpty) {
           return 'Ad alanı boş olamaz';
@@ -43,6 +44,7 @@ class _RegisterPageState extends State<RegisterPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      // ignore: missing_return
       validator: (String value) {
         if (value.trim().isEmpty) {
           return 'Soyad alanı boş olamaz';
@@ -60,6 +62,7 @@ class _RegisterPageState extends State<RegisterPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      // ignore: missing_return
       validator: (String value) {
         Pattern pattern =
             r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -70,7 +73,6 @@ class _RegisterPageState extends State<RegisterPage> {
       },
       onSaved: (newValue) => emailValue = newValue,
     );
-    bool _acceptUntrusted = false;
     final password = TextFormField(
       autofocus: false,
       initialValue: '',
@@ -80,6 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      // ignore: missing_return
       validator: (String value) {
         if (value.length < 6) {
           return 'En az 6 karakter';

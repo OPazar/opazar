@@ -38,8 +38,7 @@ class _DealerPageState extends State<DealerPage> {
       child: AsyncBuilder<Dealer>(
         stream: dealerStream,
         waiting: (context) => Text('Loading...'),
-        builder: (context, value) =>
-            DealerShowcase(images: value.showcaseImageUrls),
+        builder: (context, value) => DealerShowcase(images: value.showcaseImageUrls),
         error: (context, error, stackTrace) => Text('Error! $error'),
         closed: (context, value) => Text('$value (closed)'),
       ),
@@ -114,8 +113,8 @@ class DealerDetails extends StatelessWidget {
     var dealerRate = Container(
       padding: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
-      child: GestureDetector(
-        onTap: () {
+      child: RawMaterialButton(
+        onPressed: () {
           _settingModalBottomSheet(context);
         },
         child: Row(
@@ -140,23 +139,10 @@ class DealerDetails extends StatelessWidget {
     );
     return Column(
       children: <Widget>[
-        Container(
-            height: 250.0,
-            width: double.infinity,
-            color: Colors.blue,
-            child: dealerImage),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: dealerName),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: dealerSlogan),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: dealerRate),
+        Container(height: 250.0, width: double.infinity, color: Colors.blue, child: dealerImage),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerName),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerSlogan),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerRate),
       ],
     );
   }
@@ -184,8 +170,7 @@ class DealerShowcase extends StatelessWidget {
             ),
           ),
         ),
-        placeholder: (context, url) =>
-            Center(child: CircularProgressIndicator()),
+        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ),
     );
@@ -201,8 +186,7 @@ class DealerShowcase extends StatelessWidget {
         children: List.generate(
             images.length,
             (index) => Container(
-                child: gridViewItem(images[index]),
-                padding: EdgeInsets.only(right: 8.0))),
+                child: gridViewItem(images[index]), padding: EdgeInsets.only(right: 8.0))),
       ),
     );
 
@@ -254,8 +238,7 @@ class DealerProducts extends StatelessWidget {
                       ),
                       // height: 130,
                     ),
-                    placeholder: (context, url) =>
-                        Center(child: CircularProgressIndicator()),
+                    placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                   ),
                 ),
@@ -279,8 +262,7 @@ class DealerProducts extends StatelessWidget {
                             Row(
                               children: <Widget>[
                                 Text('5'),
-                                Icon(Icons.star,
-                                    size: 20, color: Colors.yellow[800]),
+                                Icon(Icons.star, size: 20, color: Colors.yellow[800]),
                               ],
                             )
                           ],
@@ -304,8 +286,7 @@ class DealerProducts extends StatelessWidget {
         padding: EdgeInsets.all(4.0),
         crossAxisCount: 2,
         childAspectRatio: (8 / 9),
-        children: List.generate(
-            products.length, (index) => productItem(products[index])),
+        children: List.generate(products.length, (index) => productItem(products[index])),
       );
     } else {
       return Text('enought product');
@@ -322,47 +303,41 @@ class CommitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            CircleAvatar(
-              radius: 15,
-              backgroundColor: Color(0xffFDCF09),
-              child: CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(
-                    'https://i.pinimg.com/736x/9b/3d/e7/9b3de7b0ccb90881dbb5c213bb47cec1.jpg'),
-              ),
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(left:10.0),
+            child: CircleAvatar(
+              radius: 17,
+              backgroundImage: NetworkImage(
+                  'https://i.pinimg.com/736x/9b/3d/e7/9b3de7b0ccb90881dbb5c213bb47cec1.jpg'),
             ),
-            Container(
+          ),
+          Expanded(
+            child: Container(
               padding: EdgeInsets.all(10),
               margin: EdgeInsets.all(10),
-              child: Text(
-                comment.content,
-                maxLines: 2,
-              ),
+              child: Text('${comment.buyerUid}:\n${comment.content}'),
               decoration: BoxDecoration(
-                  color: Colors.greenAccent,
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-            )
-          ],
-        )
-      ],
+                  color: Colors.greenAccent, borderRadius: BorderRadius.all(Radius.circular(10))),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
 
-void _settingModalBottomSheet(context) {
-  List<Comment> comments = List<Comment>();
-   db.streamDealerComments('AXvFV6xY7Y94PeDbFyHy').listen((event) {
-    comments = event;
-  });
+_settingModalBottomSheet(context) {
+  String dealerId = 'AXvFV6xY7Y94PeDbFyHy';
+  List<Comment> comments;
+  db.streamDealerComments(dealerId).listen((commentList) => comments = commentList);
 
   showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
-        return Wrap(
+        return Column(
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(2),
@@ -380,23 +355,9 @@ void _settingModalBottomSheet(context) {
                 onSaved: (String value) {},
               ),
             ),
-            Container(
-              margin: EdgeInsets.all(5),
-              height: 300,
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.greenAccent, width: 2.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: ListView(
-                children: List.generate(
-                    comments.length,
-                    (index) => CommitCard(
-                          comments[index],
-                        )),
-              ),
-            ),
-          ],
+            Wrap(
+            children: List.generate(comments.length, (index) => CommitCard(comments[index])),
+          ),]
         );
       });
 }

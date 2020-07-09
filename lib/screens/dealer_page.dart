@@ -3,11 +3,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:opazar/models/Comment.dart';
 import 'package:provider/provider.dart';
 
+import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
+import 'package:opazar/models/User.dart';
 import 'package:opazar/services/db.dart';
 
 class DealerPage extends StatefulWidget {
@@ -294,31 +295,84 @@ class DealerProducts extends StatelessWidget {
   }
 }
 
-class CommitCard extends StatelessWidget {
-  final Comment comment;
-
-  CommitCard(
-    this.comment,
+_settingModalBottomSheet(context) {
+  var commentsStream = db.streamDealerComments(dealerId);
+  var commentListProvider = StreamProvider<List<Comment>>.value(
+    value: commentsStream,
+    child: AsyncBuilder<List<Comment>>(
+      stream: commentsStream,
+      waiting: (context) => Text('Loading...'),
+      builder: (context, value) => CommentCardList(
+        comments: value,
+      ),
+      error: (context, error, stackTrace) => Text('Error! $error'),
+      closed: (context, value) => Text('$value (closed)'),
+    ),
   );
+  showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Column(children: <Widget>[
+          Container(
+            padding: EdgeInsets.all(2),
+            child: TextFormField(
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(30),
+              ],
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                filled: true,
+                icon: Icon(Icons.comment),
+                labelText: 'Yorum Yap',
+              ),
+              onSaved: (String value) {},
+            ),
+          ),
+          commentListProvider,
+        ]);
+      });
+}
+
+class CommentCard extends StatelessWidget {
+  final Comment comment;
+  final User user;
+
+  CommentCard(this.comment, this.user);
 
   @override
   Widget build(BuildContext context) {
+    print('user: ${user.toMap()}');
     return Container(
       child: Row(
         children: <Widget>[
           Container(
-            padding: EdgeInsets.only(left:10.0),
-            child: CircleAvatar(
-              radius: 17,
-              backgroundImage: NetworkImage(
-                  'https://i.pinimg.com/736x/9b/3d/e7/9b3de7b0ccb90881dbb5c213bb47cec1.jpg'),
-            ),
-          ),
+              margin: EdgeInsets.only(left: 10.0),
+              width: 50,
+              height: 50,
+              child: CachedNetworkImage(
+                imageUrl: user.imageUrl,
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              )),
           Expanded(
             child: Container(
               padding: EdgeInsets.all(10),
               margin: EdgeInsets.all(10),
-              child: Text('${comment.buyerUid}:\n${comment.content}'),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: 50.0,
+                ),
+                child: Text('${user.name}:\n${comment.content}\npuanım: ${comment.rate}'),
+              ),
               decoration: BoxDecoration(
                   color: Colors.greenAccent, borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
@@ -329,35 +383,32 @@ class CommitCard extends StatelessWidget {
   }
 }
 
-_settingModalBottomSheet(context) {
-  String dealerId = 'AXvFV6xY7Y94PeDbFyHy';
-  List<Comment> comments;
-  db.streamDealerComments(dealerId).listen((commentList) => comments = commentList);
+class CommentCardList extends StatelessWidget {
+  final List<Comment> comments;
 
-  showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        return Column(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(2),
-              child: TextFormField(
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(30),
-                ],
-                decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.comment),
-                  hintText: '',
-                  labelText: 'Yorum Yap',
-                ),
-                onSaved: (String value) {},
-              ),
-            ),
-            Wrap(
-            children: List.generate(comments.length, (index) => CommitCard(comments[index])),
-          ),]
+  const CommentCardList({
+    Key key,
+    @required this.comments,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      children: List.generate(comments.length, (index) {
+        var currentComment = comments[index];
+        var userStream = db.streamUser(currentComment.buyerUid);
+        var userProvider = StreamProvider<User>.value(
+          value: userStream,
+          child: AsyncBuilder<User>(
+            stream: userStream,
+            waiting: (context) => Text('Loading...'),
+            builder: (context, value) => CommentCard(currentComment, value),
+            error: (context, error, stackTrace) => Text('Error! $error'),
+            closed: (context, value) => Text('$value (closed)'),
+          ),
         );
-      });
+        return userProvider;
+      }),
+    );
+  }
 }

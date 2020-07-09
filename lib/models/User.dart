@@ -16,7 +16,7 @@ class User {
     data = data ?? {};
     return User(
       name: data['name'] ?? '',
-      imageUrl: data['imageurl'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
       email: data['email'] ?? 0,
     );
   }
@@ -26,7 +26,7 @@ class User {
     return User(
       uid: snapshot.documentID ?? '',
       name: data['name'] ?? '',
-      imageUrl: data['imageurl'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
       email: data['email'] ?? 0,
     );
   }

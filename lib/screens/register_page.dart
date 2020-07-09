@@ -7,26 +7,48 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _agreedToTOS = false;
+  bool _autoValidate = false;
+
+  String nameValue;
+  String sureNameValue;
+  String emailValue;
+  String passwordValue;
+
   @override
   Widget build(BuildContext context) {
-    final logo = Hero(
-      tag: 'hero',
-      child: CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 48.0,
-        child: Icon(Icons.shopping_cart,size: 96,),
-      ),
-    );
-
     final name = TextFormField(
       keyboardType: TextInputType.text,
       autofocus: false,
       initialValue: '',
       decoration: InputDecoration(
-        hintText: 'Name',
+        hintText: 'Ad',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      validator: (String value) {
+        if (value.trim().isEmpty) {
+          return 'Ad alanı boş olamaz';
+        }
+      },
+      onSaved: (newValue) => nameValue = newValue,
+    );
+    final surename = TextFormField(
+      keyboardType: TextInputType.text,
+      autofocus: false,
+      initialValue: '',
+      decoration: InputDecoration(
+        hintText: 'Soyad',
+        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+      ),
+      validator: (String value) {
+        if (value.trim().isEmpty) {
+          return 'Soyad alanı boş olamaz';
+        }
+      },
+      onSaved: (newValue) => sureNameValue = newValue,
     );
 
     final email = TextFormField(
@@ -38,65 +60,116 @@ class _RegisterPageState extends State<RegisterPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      validator: (String value) {
+        Pattern pattern =
+            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+        RegExp regex = new RegExp(pattern);
+        if (!regex.hasMatch(value)) {
+          return 'Geçersiz email adresi';
+        }
+      },
+      onSaved: (newValue) => emailValue = newValue,
     );
-
+    bool _acceptUntrusted = false;
     final password = TextFormField(
       autofocus: false,
       initialValue: '',
       obscureText: true,
       decoration: InputDecoration(
-        hintText: 'Password',
+        hintText: 'Şifre',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      validator: (String value) {
+        if (value.length < 6) {
+          return 'En az 6 karakter';
+        }
+      },
+      onSaved: (newValue) => passwordValue = newValue,
     );
 
-    final confirmPassword = TextFormField(
-      autofocus: false,
-      initialValue: '',
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Confirm Password',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+    final checkBox = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Row(
+        children: <Widget>[
+          Checkbox(
+            value: _agreedToTOS,
+            onChanged: _setAgreedToTOS,
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _setAgreedToTOS(!_agreedToTOS),
+              child: const Text(
+                'Hizmet Şartlarını ve Gizlilik Politikasını kabul ediyorum',
+              ),
+            ),
+          ),
+        ],
       ),
     );
 
-    final loginButton = Padding(
+    final submitButton = Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: RaisedButton(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
-        onPressed: () {},
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
-        child: Text('Register', style: TextStyle(color: Colors.white)),
+        child: Text('Kayıt ol', style: TextStyle(color: Colors.white)),
+        onPressed: _submittable() ? _validateInputs : null,
       ),
     );
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          primary: false,
-          padding: EdgeInsets.only(left: 24.0, right: 24.0),
-          children: <Widget>[
-            logo,
-            SizedBox(height: 48.0),
-            name,
-            SizedBox(height: 8.0),
-            email,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 8.0),
-            confirmPassword,
-            SizedBox(height: 24.0),
-            loginButton,
-          ],
+        child: Form(
+          key: _formKey,
+          autovalidate: _autoValidate,
+          child: ListView(
+            shrinkWrap: true,
+            primary: false,
+            padding: EdgeInsets.only(left: 24.0, right: 24.0),
+            children: <Widget>[
+              name,
+              SizedBox(height: 8.0),
+              surename,
+              SizedBox(height: 8.0),
+              email,
+              SizedBox(height: 8.0),
+              password,
+              SizedBox(height: 8.0),
+              checkBox,
+              SizedBox(height: 24.0),
+              submitButton,
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _validateInputs() {
+    if (_formKey.currentState.validate()) {
+      print('validated');
+      _formKey.currentState.save();
+      print('{name: $nameValue, sureName: $sureNameValue, email: $emailValue, password: $passwordValue}');
+    } else {
+      print('unValidated');
+      setState(() {
+        _autoValidate = true;
+      });
+    }
+  }
+
+  bool _submittable() {
+    return _agreedToTOS;
+  }
+
+  void _setAgreedToTOS(bool newValue) {
+    setState(() {
+      _agreedToTOS = newValue;
+    });
   }
 }

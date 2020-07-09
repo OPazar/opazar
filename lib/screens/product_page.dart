@@ -2,7 +2,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:opazar/screens/dealers_page.dart';
+
+import 'dealer_page.dart';
+
 
 
 class ProductPage extends StatefulWidget {

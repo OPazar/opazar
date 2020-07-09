@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/home_page.dart';
 
 
 void main() => runApp(MyApp());
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blueGrey),
-      home: DealerPage(),
+      home: HomePage(),
     );
   }
 }

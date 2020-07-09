@@ -61,10 +61,16 @@ class DatabaseService {
   }
 
   //get user
-  Stream<User> streamUser(String userUid){
+  Stream<User> streamUser(String userId){
     var ref = _db
     .collection('users')
-    .document(userUid);
+    .document(userId);
     return ref.snapshots().map((snapshot) => User.fromSnapshot(snapshot));
   }
+
+  //create user details
+  Future<void> createUserDetails(String userId, User user){
+    return _db.collection('users').document(userId).setData(user.toMap());
+  }
+
 }

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
+import 'package:opazar/screens/dealer_page.dart';
 
 class ProductsGridView extends StatelessWidget {
   final List<DaP> dapList;
@@ -12,8 +13,9 @@ class ProductsGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
-      childAspectRatio: (4/5),
-      children: List.generate(dapList.length, (index) => dapList[index].getWidget()),
+      childAspectRatio: (4 / 5),
+      children: List.generate(
+          dapList.length, (index) => dapList[index].getWidget(context)),
     );
   }
 }
@@ -24,7 +26,7 @@ class DaP {
 
   DaP({@required this.dealer, @required this.product});
 
-  Widget getWidget() {
+  Widget getWidget(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -76,7 +78,16 @@ class DaP {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text(dealer.name),
+                        GestureDetector(
+                            onTap: () {
+                              print('go go go');
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          DealerPage(dealer: dealer)));
+                            },
+                            child: Text(dealer.name)),
                         Row(
                           children: <Widget>[
                             Text('5'),

@@ -1,9 +1,6 @@
 import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:opazar/screens/home_page.dart';
-// import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/register_page.dart';
 import 'package:opazar/services/auth.dart';
 
@@ -19,10 +16,12 @@ class _LoginPageState extends State<LoginPage> {
 
   String emailValue;
   String passwordValue;
-  BuildContext rootContext;
+
+  BuildContext baseContext;
 
   @override
   Widget build(BuildContext context) {
+    baseContext = context;
     final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
@@ -88,8 +87,8 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                   child: GestureDetector(
                 child: Text('Buraya tıklayarak kayıt olabilirsin'),
-                onTap: () => Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => RegisterPage())),
+                onTap: () => Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => RegisterPage())),
               )),
             ],
           ),
@@ -103,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
       // print('validated');
       _formKey.currentState.save();
       //onayla
-      logIn();
+      login();
     } else {
       setState(() {
         _autoValidate = true;
@@ -111,56 +110,57 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  logIn() {
-    Dialog doneDialog = Dialog(
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('Giriş Başarılı'),
-            Icon(Icons.check),
-          ],
+  void login() {
+    AlertDialog successAlert = AlertDialog(
+      title: Text('Giriş Başarılı'),
+      content: Text('Email adresiniz ve parolanız doğru'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Devam'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => HomePage()));
+          },
         ),
+      ],
+    );
+
+    Dialog waitingAlert = Dialog(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 32.0),
+            child: CircularProgressIndicator(),
+          ),
+        ],
       ),
     );
 
-    Dialog errorDialog = Dialog(
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('Giriş Başarısız'),
-            Icon(Icons.close),
-          ],
+    AlertDialog errorAlert = AlertDialog(
+      title: Text('Giriş Başarısız'),
+      content: Text('Email adresiniz veya parolanız yanlış'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Kapat'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-      ),
-    );
-
-    Dialog loadingDialog = Dialog(
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('Bekleyin'),
-            CircularProgressIndicator(),
-          ],
-        ),
-      ),
+      ],
     );
 
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) => EnhancedFutureBuilder(
-        future: auth.login(email: emailValue, password: passwordValue),
-        rememberFutureResult: false,
-        whenDone: (snapshotData) => doneDialog,
-        whenNotDone: loadingDialog,
-        whenError: (error) => errorDialog,
-      ),
+          future: auth.login(email: emailValue, password: passwordValue),
+          rememberFutureResult: false,
+          whenDone: (snapshotData) => successAlert,
+          whenNotDone: waitingAlert,
+          whenError: (error) {
+            print(error);
+            return errorAlert;
+          }),
     );
   }
 }

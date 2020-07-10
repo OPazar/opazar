@@ -1,5 +1,5 @@
+import 'package:async_builder/async_builder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -35,7 +35,9 @@ class _DealerPageState extends State<DealerPage> {
       whenDone: (snapshotData) => DealerProducts(products: snapshotData),
       whenNotDone: Text('Loading'),
       whenError: (error) => Text('Error! $error'),
+
     );
+
     return Scaffold(
         appBar: AppBar(title: Text(widget.dealer.name)),
         body: Container(
@@ -300,6 +302,7 @@ _settingModalBottomSheet(context) {
       rememberFutureResult: false,
       whenDone: (snapshotData) => CommentCardList(comments: snapshotData),
       whenNotDone: null);
+
   showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -319,7 +322,7 @@ _settingModalBottomSheet(context) {
               onSaved: (String value) {},
             ),
           ),
-          commentsBuilder
+          commentListBuilder,
         ]);
       });
 }
@@ -390,12 +393,12 @@ class CommentCardList extends StatelessWidget {
     return Wrap(
       children: List.generate(comments.length, (index) {
         var currentComment = comments[index];
-        return EnhancedFutureBuilder<User>(
+        return AsyncBuilder<User>(
           future: db.getUser(currentComment.buyerUid),
-          rememberFutureResult: false,
-          whenDone: (snapshotData) => CommentCard(currentComment, snapshotData),
-          whenNotDone: Text('Loading...'),
-          whenError: (error) => Text('Error! $error'),
+          waiting: (context) => Text('Loading...'),
+          builder: (context, value) => CommentCard(currentComment, value),
+          error: (context, error, stackTrace) => Text('Error! $error'),
+          closed: (context, value) => Text('$value (closed)'),
         );
       }),
     );

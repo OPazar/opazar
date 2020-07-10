@@ -8,69 +8,139 @@ class DatabaseService {
   final Firestore _db = Firestore.instance;
 
   //get product
-  Stream<Product> streamProduct(String dealerId, String productId) {
-    return _db
-        .collection('dealers')
-        .document(dealerId)
-        .collection('products')
-        .document(productId)
-        .snapshots()
-        .map((snapshot) => Product.fromSnapshot(snapshot));
+  // ignore: missing_return
+  Future<Product> getProduct(String dealerId, String productId) async {
+    try {
+      var documentSnapshot = await _db
+          .collection('dealers')
+          .document(dealerId)
+          .collection('products')
+          .document(productId)
+          .get();
+
+      return Product.fromSnapshot(documentSnapshot);
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //get products
-  Stream<List<Product>> streamProducts(String dealerId) {
-    var ref = _db.collection('dealers').document(dealerId).collection('products');
-    return ref.snapshots().map((list) => 
-        list.documents.map((snapshot) => Product.fromSnapshot(snapshot)).toList());
+  // ignore: missing_return
+  Future<List<Product>> getProducts(String dealerId) async {
+    try {
+      print('getProduct: start');
+      var querySnapshot =
+          await _db.collection('dealers').document(dealerId).collection('products').getDocuments();
+
+      var documentSnapshotList = querySnapshot.documents;
+
+      if (documentSnapshotList.length > 0) {
+        return List.generate(documentSnapshotList.length,
+            (index) => Product.fromSnapshot(documentSnapshotList[index]));
+      } else {
+        Future.error(DBError.noItems);
+      }
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //get dealer
-  Stream<Dealer> streamDealer(String dealerId) {
-    return _db
-        .collection('dealers')
-        .document(dealerId)
-        .snapshots()
-        .map((snapshot) => Dealer.fromSnapshot(snapshot));
+  // ignore: missing_return
+  Future<Dealer> getDealer(String dealerId) async {
+    try {
+      var documentSnapshot = await _db.collection('dealers').document(dealerId).get();
+      return Dealer.fromSnapshot(documentSnapshot);
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //get dealers
-  Stream<List<Dealer>> streamDealers() {
-    var ref = _db.collection('dealers');
-    return ref.snapshots().map((list) => 
-        list.documents.map((snapshot) => Dealer.fromSnapshot(snapshot)).toList());
+  // ignore: missing_return
+  Future<List<Dealer>> getDealers() async {
+    try {
+      var querySnapshot = await _db.collection('dealers').getDocuments();
+
+      var documentSnapshotList = querySnapshot.documents;
+
+      if (documentSnapshotList.length > 0) {
+        return List.generate(documentSnapshotList.length,
+            (index) => Dealer.fromSnapshot(documentSnapshotList[index]));
+      } else {
+        Future.error(DBError.noItems);
+      }
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //get comments in dealer
-  Stream<List<Comment>> streamDealerComments(String dealerId) {
-    var ref = _db.collection('dealers').document(dealerId).collection('comments');
-    return ref.snapshots().map((list) => 
-        list.documents.map((snapshot) => Comment.fromSnapshot(snapshot)).toList());
+  // ignore: missing_return
+  Future<List<Comment>> getDealerComments(String dealerId) async {
+    try {
+      var querySnapshot =
+          await _db.collection('dealers').document(dealerId).collection('comments').getDocuments();
+      var documentSnapshotList = querySnapshot.documents;
+
+      if (documentSnapshotList.length > 0) {
+        return List.generate(documentSnapshotList.length,
+            (index) => Comment.fromSnapshot(documentSnapshotList[index]));
+      } else {
+        Future.error(DBError.noItems);
+      }
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //get comments in product
-  Stream<List<Comment>> streamProductComments(String dealerId, String productId) {
-    var ref = _db
-    .collection('dealers')
-    .document(dealerId)
-    .collection('products')
-    .document(productId)
-    .collection('comments');
-    return ref.snapshots().map((list) => 
-        list.documents.map((snapshot) => Comment.fromSnapshot(snapshot)).toList());
+  // ignore: missing_return
+  Future<List<Comment>> getProductComments(String dealerId, String productId) async {
+    try {
+      var querySnapshot = await _db
+          .collection('dealers')
+          .document(dealerId)
+          .collection('products')
+          .document(productId)
+          .collection('comments')
+          .getDocuments();
+      var documentSnapshotList = querySnapshot.documents;
+
+      if (documentSnapshotList.length > 0) {
+        return List.generate(documentSnapshotList.length,
+            (index) => Comment.fromSnapshot(documentSnapshotList[index]));
+      } else {
+        Future.error(DBError.noItems);
+      }
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //get user
-  Stream<User> streamUser(String userId){
-    var ref = _db
-    .collection('users')
-    .document(userId);
-    return ref.snapshots().map((snapshot) => User.fromSnapshot(snapshot));
+  // ignore: missing_return
+  Future<User> getUser(String userId) async {
+    try {
+      var snapshot = await _db.collection('users').document(userId).get();
+      return User.fromSnapshot(snapshot);
+    } catch (e) {
+      Future.error(e);
+    }
   }
 
   //create user details
-  Future<void> createUserDetails(String userId, User user){
-    return _db.collection('users').document(userId).setData(user.toMap());
+  // ignore: missing_return
+  Future<bool> setUserDetails(String userId, User user) async {
+    try {
+      await _db.collection('users').document(userId).setData(user.toMap());
+      return true;
+    } catch (e) {
+      Future.error(e);
+    }
   }
+}
 
+enum DBError {
+  noItems,
 }

@@ -1,4 +1,3 @@
-import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/register_page.dart';

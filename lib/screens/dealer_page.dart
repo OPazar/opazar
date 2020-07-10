@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:opazar/main.dart';
-import 'package:provider/provider.dart';
 
 import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
@@ -25,38 +24,30 @@ final dealerId = 'QFvm25W7Zrtj25Tj3DR2';
 class _DealerPageState extends State<DealerPage> {
   @override
   Widget build(BuildContext context) {
-    var dealerStream = db.streamDealer(dealerId);
-    var detailProvider = StreamProvider<Dealer>.value(
-      value: dealerStream,
-      child: AsyncBuilder<Dealer>(
-        stream: dealerStream,
+    var detailBuilder = FutureBuilder(
+      future: db.getDealer(dealerId),
+      builder: (context, snapshot) => AsyncBuilder<Dealer>(
+        future: db.getDealer(dealerId),
         waiting: (context) => Text('Loading...'),
-        builder: (context, value) => DealerDetails(dealer: value),
+        builder: (context, value) {
+          return Column(
+            children: <Widget>[
+              DealerDetails(dealer: value),
+              DealerShowcase(images: value.showcaseImageUrls)
+            ],
+          );
+        },
         error: (context, error, stackTrace) => Text('Error! $error'),
-        closed: (context, value) => Text('$value (closed)'),
       ),
     );
 
-    var showcaseProvider = StreamProvider<Dealer>.value(
-      value: dealerStream,
-      child: AsyncBuilder<Dealer>(
-        stream: dealerStream,
-        waiting: (context) => Text('Loading...'),
-        builder: (context, value) => DealerShowcase(images: value.showcaseImageUrls),
-        error: (context, error, stackTrace) => Text('Error! $error'),
-        closed: (context, value) => Text('$value (closed)'),
-      ),
-    );
-
-    var productsStream = db.streamProducts(dealerId);
-    var productsProvider = StreamProvider<List<Product>>.value(
-      value: productsStream,
-      child: AsyncBuilder<List<Product>>(
-        stream: productsStream,
+    var productsBuilder = FutureBuilder(
+      future: db.getProducts(dealerId),
+      builder: (context, snapshot) => AsyncBuilder<List<Product>>(
+        future: db.getProducts(dealerId),
         waiting: (context) => Text('Loading...'),
         builder: (context, value) => DealerProducts(products: value),
-        error: (context, error, stackTrace) => Text('Error! $error'),
-        closed: (context, value) => Text('$value (closed)'),
+        error: (context, error, stackTrace) => Text('Error! $error')
       ),
     );
 
@@ -66,9 +57,8 @@ class _DealerPageState extends State<DealerPage> {
         physics: ScrollPhysics(),
         shrinkWrap: true,
         children: <Widget>[
-          detailProvider,
-          showcaseProvider,
-          productsProvider,
+          detailBuilder,
+          productsBuilder,
         ],
       ),
     ));
@@ -221,7 +211,8 @@ class DealerProducts extends StatelessWidget {
         child: RawMaterialButton(
           onPressed: () {
             auth.signOut(); // deneme amaçlı yapıldı
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
           },
           child: Container(
             padding: EdgeInsets.all(8.0),
@@ -302,18 +293,15 @@ class DealerProducts extends StatelessWidget {
 }
 
 _settingModalBottomSheet(context) {
-  var commentsStream = db.streamDealerComments(dealerId);
-  var commentListProvider = StreamProvider<List<Comment>>.value(
-    value: commentsStream,
-    child: AsyncBuilder<List<Comment>>(
-      stream: commentsStream,
-      waiting: (context) => Text('Loading...'),
-      builder: (context, value) => CommentCardList(
-        comments: value,
-      ),
-      error: (context, error, stackTrace) => Text('Error! $error'),
-      closed: (context, value) => Text('$value (closed)'),
+  var commentsFuture = db.getDealerComments(dealerId);
+  var commentListBuilder = AsyncBuilder<List<Comment>>(
+    future: commentsFuture,
+    waiting: (context) => Text('Loading...'),
+    builder: (context, value) => CommentCardList(
+      comments: value,
     ),
+    error: (context, error, stackTrace) => Text('Error! $error'),
+    closed: (context, value) => Text('$value (closed)'),
   );
   showModalBottomSheet(
       context: context,
@@ -334,7 +322,7 @@ _settingModalBottomSheet(context) {
               onSaved: (String value) {},
             ),
           ),
-          commentListProvider,
+          commentListBuilder,
         ]);
       });
 }
@@ -402,18 +390,13 @@ class CommentCardList extends StatelessWidget {
     return Wrap(
       children: List.generate(comments.length, (index) {
         var currentComment = comments[index];
-        var userStream = db.streamUser(currentComment.buyerUid);
-        var userProvider = StreamProvider<User>.value(
-          value: userStream,
-          child: AsyncBuilder<User>(
-            stream: userStream,
-            waiting: (context) => Text('Loading...'),
-            builder: (context, value) => CommentCard(currentComment, value),
-            error: (context, error, stackTrace) => Text('Error! $error'),
-            closed: (context, value) => Text('$value (closed)'),
-          ),
+        return AsyncBuilder<User>(
+          future: db.getUser(currentComment.buyerUid),
+          waiting: (context) => Text('Loading...'),
+          builder: (context, value) => CommentCard(currentComment, value),
+          error: (context, error, stackTrace) => Text('Error! $error'),
+          closed: (context, value) => Text('$value (closed)'),
         );
-        return userProvider;
       }),
     );
   }

@@ -9,6 +9,7 @@ class AuthService {
   final _auth = FirebaseAuth.instance;
   final db = DatabaseService();
 
+  // ignore: missing_return
   Future<FirebaseUser> register({
     @required String email,
     @required String password,
@@ -22,19 +23,24 @@ class AuthService {
       assert(user != null);
       assert(await user.getIdToken() != null);
 
-      await db.createUserDetails(
-          user.uid,
-          User(
-            email: email,
-            name: name,
-            sureName: sureName,
-          ));
-      return user;
+      try {
+        await db.setUserDetails(
+            user.uid,
+            User(
+              email: email,
+              name: name,
+              sureName: sureName,
+            ));
+        return user;
+      } catch (_e) {
+        Future.error(_e);
+      }
     } catch (e) {
-      getProblemType(e);
+      getAuthProblemType(e);
     }
   }
 
+  // ignore: missing_return
   Future<FirebaseUser> login({
     @required String email,
     @required String password,
@@ -47,7 +53,7 @@ class AuthService {
 
       return user;
     } catch (e) {
-      getProblemType(e);
+      getAuthProblemType(e);
     }
   }
 
@@ -61,7 +67,7 @@ class AuthService {
 }
 
 enum AuthProblems { UserNotFound, PasswordNotValid, NetworkError }
-getProblemType(dynamic e) {
+getAuthProblemType(dynamic e) {
   AuthProblems errorType;
 
   if (Platform.isAndroid) {
@@ -75,8 +81,6 @@ getProblemType(dynamic e) {
       case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
         errorType = AuthProblems.NetworkError;
         break;
-      default:
-        print('Case ${e.message} is not yet implemented');
     }
   } else if (Platform.isIOS) {
     switch (e.code) {
@@ -93,10 +97,5 @@ getProblemType(dynamic e) {
         print('Case ${e.message} is not yet implemented');
     }
   }
-
-  if (errorType != null) {
-    return Future.error(errorType);
-  } else {
-    return Future.error('undefined');
-  }
+  return Future.error(errorType);
 }

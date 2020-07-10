@@ -13,7 +13,7 @@ import 'package:opazar/services/db.dart';
 Dealer _dealer;
 
 class DealerPage extends StatefulWidget {
-  Dealer dealer;
+  final Dealer dealer;
 
   DealerPage({@required this.dealer});
 

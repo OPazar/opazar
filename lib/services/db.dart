@@ -3,12 +3,12 @@ import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
+import 'package:opazar/widgets/products_grid_view.dart';
 
 class DatabaseService {
   final Firestore _db = Firestore.instance;
 
   //get product
-  // ignore: missing_return
   Future<Product> getProduct(String dealerId, String productId) async {
     try {
       var documentSnapshot = await _db
@@ -20,16 +20,18 @@ class DatabaseService {
 
       return Product.fromSnapshot(documentSnapshot);
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 
   //get products
-  // ignore: missing_return
   Future<List<Product>> getProducts(String dealerId) async {
     try {
-      var querySnapshot =
-          await _db.collection('dealers').document(dealerId).collection('products').getDocuments();
+      var querySnapshot = await _db
+          .collection('dealers')
+          .document(dealerId)
+          .collection('products')
+          .getDocuments();
 
       var documentSnapshotList = querySnapshot.documents;
 
@@ -37,21 +39,21 @@ class DatabaseService {
         return List.generate(documentSnapshotList.length,
             (index) => Product.fromSnapshot(documentSnapshotList[index]));
       } else {
-        Future.error(DBError.noItems);
+        return Future.error(DBError.noItems);
       }
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 
   //get dealer
-  // ignore: missing_return
   Future<Dealer> getDealer(String dealerId) async {
     try {
-      var documentSnapshot = await _db.collection('dealers').document(dealerId).get();
+      var documentSnapshot =
+          await _db.collection('dealers').document(dealerId).get();
       return Dealer.fromSnapshot(documentSnapshot);
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 
@@ -67,35 +69,63 @@ class DatabaseService {
         return List.generate(documentSnapshotList.length,
             (index) => Dealer.fromSnapshot(documentSnapshotList[index]));
       } else {
-        Future.error(DBError.noItems);
+        return Future.error(DBError.noItems);
       }
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
+    }
+  }
+
+  Future<List<DaP>> getAllProducts() async {
+    List<DaP> dapList = List<DaP>();
+
+    try {
+      var dealers = await getDealers();
+      if (dealers.length > 0) {
+        for (Dealer dealer in dealers) {
+          var products = await getProducts(dealer.uid);
+          if (products.length > 0) {
+            for (Product product in products) {
+              var dap = DaP(dealer: dealer, product: product);
+              dapList.add(dap);
+            }
+          } else {
+            return Future.error(DBError.noItems);
+          }
+        }
+        return dapList;
+      } else {
+        return Future.error(DBError.noItems);
+      }
+    } catch (e) {
+      return Future.error(e);
     }
   }
 
   //get comments in dealer
-  // ignore: missing_return
   Future<List<Comment>> getDealerComments(String dealerId) async {
     try {
-      var querySnapshot =
-          await _db.collection('dealers').document(dealerId).collection('comments').getDocuments();
+      var querySnapshot = await _db
+          .collection('dealers')
+          .document(dealerId)
+          .collection('comments')
+          .getDocuments();
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
         return List.generate(documentSnapshotList.length,
             (index) => Comment.fromSnapshot(documentSnapshotList[index]));
       } else {
-        Future.error(DBError.noItems);
+        return Future.error(DBError.noItems);
       }
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 
   //get comments in product
-  // ignore: missing_return
-  Future<List<Comment>> getProductComments(String dealerId, String productId) async {
+  Future<List<Comment>> getProductComments(
+      String dealerId, String productId) async {
     try {
       var querySnapshot = await _db
           .collection('dealers')
@@ -110,32 +140,30 @@ class DatabaseService {
         return List.generate(documentSnapshotList.length,
             (index) => Comment.fromSnapshot(documentSnapshotList[index]));
       } else {
-        Future.error(DBError.noItems);
+        return Future.error(DBError.noItems);
       }
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 
   //get user
-  // ignore: missing_return
   Future<User> getUser(String userId) async {
     try {
       var snapshot = await _db.collection('users').document(userId).get();
       return User.fromSnapshot(snapshot);
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 
   //create user details
-  // ignore: missing_return
   Future<bool> setUserDetails(String userId, User user) async {
     try {
       await _db.collection('users').document(userId).setData(user.toMap());
       return true;
     } catch (e) {
-      Future.error(e);
+      return Future.error(e);
     }
   }
 }

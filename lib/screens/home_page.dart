@@ -4,20 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/services/db.dart';
+import 'package:opazar/widgets/products_grid_view.dart';
 
 import '../main.dart';
+
+DatabaseService db = DatabaseService();
 
 class HomePage extends StatelessWidget {
   const HomePage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var errorWidget = Center(child: Icon(Icons.error));
+    var waitingWidget = Center(child: CircularProgressIndicator());
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('data'),
+        title: Text('Tüm Ürünler'),
       ),
       drawer: DrawerBar(),
-      body: Container(),
+      body: EnhancedFutureBuilder(
+        future: db.getAllProducts(),
+        rememberFutureResult: false,
+        whenNotDone: waitingWidget,
+        whenDone: (snapshotData) => ProductsGridView(dapList: snapshotData),
+        whenError: (error) => errorWidget,
+      ),
     );
   }
 }
@@ -45,7 +58,8 @@ class DrawerBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) =>
+                    Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Icon(Icons.error),
               ),
             ),
@@ -70,7 +84,7 @@ class DrawerBar extends StatelessWidget {
         ],
       ),
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: Colors.blueGrey,
       ),
     );
   }
@@ -91,7 +105,7 @@ class DrawerBar extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
-      color: Colors.blue,
+      color: Colors.blueGrey,
       child: Row(
         children: <Widget>[
           Expanded(
@@ -114,7 +128,8 @@ class DrawerBar extends StatelessWidget {
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => TempPage())); // deneme amaçlı yapıldı
+                            builder: (context) =>
+                                TempPage())); // deneme amaçlı yapıldı
                   }
                 },
                 icon: Icon(FlutterIcons.exit_to_app_mdi),
@@ -142,9 +157,11 @@ class DrawerBar extends StatelessWidget {
           Expanded(child: drawerContent),
           EnhancedFutureBuilder(
             future: auth.currentUser(),
-            whenDone: (snapshotData) => buildDrawerBottomBar(context, isSignedId: true),
+            whenDone: (snapshotData) =>
+                buildDrawerBottomBar(context, isSignedId: true),
             whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
-            whenError: (error) => buildDrawerBottomBar(context, isSignedId: false),
+            whenError: (error) =>
+                buildDrawerBottomBar(context, isSignedId: false),
             rememberFutureResult: true,
           ),
         ],

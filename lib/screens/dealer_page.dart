@@ -1,67 +1,58 @@
-import 'package:async_builder/async_builder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:opazar/main.dart';
-
 import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
-import 'package:opazar/services/db.dart';
 import 'package:opazar/services/auth.dart';
+import 'package:opazar/services/db.dart';
+
+Dealer _dealer;
 
 class DealerPage extends StatefulWidget {
+  final Dealer dealer;
+
+  DealerPage({@required this.dealer});
+
   @override
   _DealerPageState createState() => _DealerPageState();
 }
 
 var db = DatabaseService();
 var auth = AuthService();
-final dealerId = 'QFvm25W7Zrtj25Tj3DR2';
 
 class _DealerPageState extends State<DealerPage> {
   @override
   Widget build(BuildContext context) {
-    var detailBuilder = FutureBuilder(
-      future: db.getDealer(dealerId),
-      builder: (context, snapshot) => AsyncBuilder<Dealer>(
-        future: db.getDealer(dealerId),
-        waiting: (context) => Text('Loading...'),
-        builder: (context, value) {
-          return Column(
-            children: <Widget>[
-              DealerDetails(dealer: value),
-              DealerShowcase(images: value.showcaseImageUrls)
-            ],
-          );
-        },
-        error: (context, error, stackTrace) => Text('Error! $error'),
-      ),
-    );
+    _dealer = widget.dealer;
 
-    var productsBuilder = FutureBuilder(
-      future: db.getProducts(dealerId),
-      builder: (context, snapshot) => AsyncBuilder<List<Product>>(
-        future: db.getProducts(dealerId),
-        waiting: (context) => Text('Loading...'),
-        builder: (context, value) => DealerProducts(products: value),
-        error: (context, error, stackTrace) => Text('Error! $error')
-      ),
+    var productsBuilder = EnhancedFutureBuilder<List<Product>>(
+      future: db.getProducts(widget.dealer.uid),
+      rememberFutureResult: false,
+      whenDone: (snapshotData) => DealerProducts(products: snapshotData),
+      whenNotDone: Text('Loading'),
+      whenError: (error) => Text('Error! $error'),
     );
-
     return Scaffold(
+        appBar: AppBar(title: Text(widget.dealer.name)),
         body: Container(
-      child: ListView(
-        physics: ScrollPhysics(),
-        shrinkWrap: true,
-        children: <Widget>[
-          detailBuilder,
-          productsBuilder,
-        ],
-      ),
-    ));
+          child: ListView(
+            physics: ScrollPhysics(),
+            shrinkWrap: true,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  DealerDetails(dealer: widget.dealer),
+                  DealerShowcase(images: widget.dealer.showcaseImageUrls)
+                ],
+              ),
+              productsBuilder,
+            ],
+          ),
+        ));
   }
 }
 
@@ -133,10 +124,23 @@ class DealerDetails extends StatelessWidget {
     );
     return Column(
       children: <Widget>[
-        Container(height: 250.0, width: double.infinity, color: Colors.blue, child: dealerImage),
-        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerName),
-        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerSlogan),
-        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerRate),
+        Container(
+            height: 250.0,
+            width: double.infinity,
+            color: Colors.blue,
+            child: dealerImage),
+        Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(8.0),
+            child: dealerName),
+        Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(8.0),
+            child: dealerSlogan),
+        Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(8.0),
+            child: dealerRate),
       ],
     );
   }
@@ -164,7 +168,8 @@ class DealerShowcase extends StatelessWidget {
             ),
           ),
         ),
-        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+        placeholder: (context, url) =>
+            Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ),
     );
@@ -180,7 +185,8 @@ class DealerShowcase extends StatelessWidget {
         children: List.generate(
             images.length,
             (index) => Container(
-                child: gridViewItem(images[index]), padding: EdgeInsets.only(right: 8.0))),
+                child: gridViewItem(images[index]),
+                padding: EdgeInsets.only(right: 8.0))),
       ),
     );
 
@@ -204,16 +210,12 @@ class DealerProducts extends StatelessWidget {
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(10)),
-          color: Colors.lightGreen[400],
+          color: Colors.grey[300],
         ),
         height: 250.0,
         margin: EdgeInsets.all(8.0),
         child: RawMaterialButton(
-          onPressed: () {
-            auth.signOut(); // deneme amaçlı yapıldı
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
-          },
+          onPressed: () {},
           child: Container(
             padding: EdgeInsets.all(8.0),
             child: Column(
@@ -236,7 +238,8 @@ class DealerProducts extends StatelessWidget {
                       ),
                       // height: 130,
                     ),
-                    placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                    placeholder: (context, url) =>
+                        Center(child: CircularProgressIndicator()),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                   ),
                 ),
@@ -260,7 +263,8 @@ class DealerProducts extends StatelessWidget {
                             Row(
                               children: <Widget>[
                                 Text('5'),
-                                Icon(Icons.star, size: 20, color: Colors.yellow[800]),
+                                Icon(Icons.star,
+                                    size: 20, color: Colors.yellow[800]),
                               ],
                             )
                           ],
@@ -284,7 +288,8 @@ class DealerProducts extends StatelessWidget {
         padding: EdgeInsets.all(4.0),
         crossAxisCount: 2,
         childAspectRatio: (8 / 9),
-        children: List.generate(products.length, (index) => productItem(products[index])),
+        children: List.generate(
+            products.length, (index) => productItem(products[index])),
       );
     } else {
       return Text('enought product');
@@ -293,16 +298,11 @@ class DealerProducts extends StatelessWidget {
 }
 
 _settingModalBottomSheet(context) {
-  var commentsFuture = db.getDealerComments(dealerId);
-  var commentListBuilder = AsyncBuilder<List<Comment>>(
-    future: commentsFuture,
-    waiting: (context) => Text('Loading...'),
-    builder: (context, value) => CommentCardList(
-      comments: value,
-    ),
-    error: (context, error, stackTrace) => Text('Error! $error'),
-    closed: (context, value) => Text('$value (closed)'),
-  );
+  var commentsBuilder = EnhancedFutureBuilder<List<Comment>>(
+      future: db.getDealerComments(_dealer.uid),
+      rememberFutureResult: false,
+      whenDone: (snapshotData) => CommentCardList(comments: snapshotData),
+      whenNotDone: null);
   showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -322,7 +322,7 @@ _settingModalBottomSheet(context) {
               onSaved: (String value) {},
             ),
           ),
-          commentListBuilder,
+          commentsBuilder
         ]);
       });
 }
@@ -335,7 +335,7 @@ class CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('user: ${user.toMap()}');
+    // print('user: ${user.toMap()}');
     return Container(
       child: Row(
         children: <Widget>[
@@ -354,7 +354,8 @@ class CommentCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) =>
+                    Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Icon(Icons.error),
               )),
           Expanded(
@@ -365,10 +366,12 @@ class CommentCard extends StatelessWidget {
                 constraints: BoxConstraints(
                   minHeight: 50.0,
                 ),
-                child: Text('${user.name}:\n${comment.content}\npuanım: ${comment.rate}'),
+                child: Text(
+                    '${user.name}:\n${comment.content}\npuanım: ${comment.rate}'),
               ),
               decoration: BoxDecoration(
-                  color: Colors.greenAccent, borderRadius: BorderRadius.all(Radius.circular(10))),
+                  color: Colors.greenAccent,
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
           )
         ],
@@ -390,12 +393,12 @@ class CommentCardList extends StatelessWidget {
     return Wrap(
       children: List.generate(comments.length, (index) {
         var currentComment = comments[index];
-        return AsyncBuilder<User>(
+        return EnhancedFutureBuilder<User>(
           future: db.getUser(currentComment.buyerUid),
-          waiting: (context) => Text('Loading...'),
-          builder: (context, value) => CommentCard(currentComment, value),
-          error: (context, error, stackTrace) => Text('Error! $error'),
-          closed: (context, value) => Text('$value (closed)'),
+          rememberFutureResult: false,
+          whenDone: (snapshotData) => CommentCard(currentComment, snapshotData),
+          whenNotDone: Text('Loading...'),
+          whenError: (error) => Text('Error! $error'),
         );
       }),
     );

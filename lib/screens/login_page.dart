@@ -1,5 +1,6 @@
+import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/register_page.dart';
 import 'package:opazar/services/auth.dart';
 
@@ -16,13 +17,15 @@ class _LoginPageState extends State<LoginPage> {
   String emailValue;
   String passwordValue;
 
+  BuildContext baseContext;
+
   @override
   Widget build(BuildContext context) {
+    baseContext = context;
     final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
       initialValue: '',
-
       decoration: InputDecoration(
         hintText: 'Email',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -84,8 +87,8 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                   child: GestureDetector(
                 child: Text('Buraya tıklayarak kayıt olabilirsin'),
-                onTap: () => Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => RegisterPage())),
+                onTap: () => Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => RegisterPage())),
               )),
             ],
           ),
@@ -96,20 +99,68 @@ class _LoginPageState extends State<LoginPage> {
 
   void _validateInputs() {
     if (_formKey.currentState.validate()) {
-      print('validated');
+      // print('validated');
       _formKey.currentState.save();
       //onayla
-      auth.login(email: emailValue, password: passwordValue).catchError((error) {}).then((value) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DealerPage(),
-            ));
-      });
+      login();
     } else {
       setState(() {
         _autoValidate = true;
       });
     }
+  }
+
+  void login() {
+    AlertDialog successAlert = AlertDialog(
+      title: Text('Giriş Başarılı'),
+      content: Text('Email adresiniz ve parolanız doğru'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Devam'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => HomePage()));
+          },
+        ),
+      ],
+    );
+
+    Dialog waitingAlert = Dialog(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 32.0),
+            child: CircularProgressIndicator(),
+          ),
+        ],
+      ),
+    );
+
+    AlertDialog errorAlert = AlertDialog(
+      title: Text('Giriş Başarısız'),
+      content: Text('Email adresiniz veya parolanız yanlış'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Kapat'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => EnhancedFutureBuilder(
+          future: auth.login(email: emailValue, password: passwordValue),
+          rememberFutureResult: false,
+          whenDone: (snapshotData) => successAlert,
+          whenNotDone: waitingAlert,
+          whenError: (error) {
+            print(error);
+            return errorAlert;
+          }),
+    );
   }
 }

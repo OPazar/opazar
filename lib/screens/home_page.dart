@@ -1,131 +1,171 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:opazar/models/User.dart';
 import 'package:opazar/screens/dealer_page.dart';
-import 'package:opazar/screens/product_page.dart';
+import 'package:opazar/services/db.dart';
+import 'package:opazar/widgets/products_grid_view.dart';
+
+import '../main.dart';
+
+DatabaseService db = DatabaseService();
 
 class HomePage extends StatelessWidget {
   const HomePage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var errorWidget = Center(child: Icon(Icons.error));
+    var waitingWidget = Center(child: CircularProgressIndicator());
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("HomePage"),
+        title: Text('Tüm Ürünler'),
       ),
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Center(
-                  child: Row(
-                children: <Widget>[
-                  CircleAvatar(
-                    radius: 58,
-                    backgroundColor: Colors.greenAccent,
-                    backgroundImage: NetworkImage(
-                        "https://i.pinimg.com/originals/fd/e0/b2/fde0b24c55a7e84bdbf5d5a89fa9607c.jpg"),
-                  ),
-                  Container(margin: EdgeInsets.all(8.0),child: Text("meric setan"))
-                ],
-              )),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-            ),
-            ListTile(
-              title: Text('selam'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/messages');
-              },
-            ),
-            ListTile(
-              title: Text('ayarlar'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/settings');
-              },
-            ),
-          ],
-        ),
+      drawer: DrawerBar(),
+      body: EnhancedFutureBuilder(
+        future: db.getAllProducts(),
+        rememberFutureResult: false,
+        whenNotDone: waitingWidget,
+        whenDone: (snapshotData) => ProductsGridView(dapList: snapshotData),
+        whenError: (error) => errorWidget,
       ),
-      body: DefaultTabController(
-        length: 2,
-        child: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverAppBar(
-                expandedHeight: 100.0,
-                floating: false,
-                pinned: false,
-                flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    background: Image.network(
-                      "https://logos.flamingtext.com/City-Logos/Logo-Design-Pazar.png",
+    );
+  }
+}
+
+class DrawerBar extends StatelessWidget {
+  Widget buildDrawerHeader({User user, bool done = true}) {
+    if (!done) {
+      user = User();
+    }
+    return DrawerHeader(
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 75,
+            height: 75,
+            child: Center(
+              child: CachedNetworkImage(
+                imageUrl: user.imageUrl,
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
                       fit: BoxFit.cover,
-                    )),
-              ),
-              //çok fazla kaydırma var aga ya aklıma bir şey gelmedi
-              //bende yatıyom artık
-              SliverPersistentHeader(
-                delegate: _SliverAppBarDelegate(
-                  TabBar(
-                    labelColor: Colors.black87,
-                    unselectedLabelColor: Colors.grey,
-                    tabs: [
-                      Tab(
-                          icon: Icon(
-                            FlutterIcons.earlybirds_faw5d,
-                          ),
-                          text: "Kümes"),
-                      Tab(
-                        icon: Icon(FlutterIcons.cow_mco),
-                        text: "Süt ve Süt Ürünleri",
-                      ),
-                      //KATEGORİLERİ BİZ SEÇECEİĞİMİZ İÇİN EKLERİZ DİYE DÜŞÜNDÜM
-                    ],
+                    ),
                   ),
                 ),
-                pinned: true,
+                placeholder: (context, url) =>
+                    Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              DealerPage(),
-              ProductPage(),
-            ],
+            ),
           ),
-        ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.all(8.0),
+                child: Text(
+                  '${user.name} ${user.sureName}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(8.0),
+                child: Text(user.email),
+              ),
+            ],
+          )
+        ],
+      ),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey,
+      ),
+    );
+  }
+
+  final Widget drawerContent = ListView(
+    padding: EdgeInsets.zero,
+    children: <Widget>[
+      ListTile(title: Text('Tüm Ürünler')),
+      ListTile(title: Text('Sebzeler')),
+      ListTile(title: Text('Meyveler')),
+      ListTile(title: Text('Bitkiler')),
+      ListTile(title: Text('Yumurta')),
+      ListTile(title: Text('Süt & Süt Ürünleri')),
+    ],
+  );
+
+  Widget buildDrawerBottomBar(BuildContext context, {bool isSignedId}) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      width: double.infinity,
+      color: Colors.blueGrey,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              child: RaisedButton.icon(
+                onPressed: () {},
+                icon: Icon(FlutterIcons.setting_ant),
+                label: Text('Düzenle'),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              child: RaisedButton.icon(
+                onPressed: () {
+                  if (isSignedId) {
+                    auth.signOut(); // deneme amaçlı yapıldı
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                TempPage())); // deneme amaçlı yapıldı
+                  }
+                },
+                icon: Icon(FlutterIcons.exit_to_app_mdi),
+                label: Text('Çıkış'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          EnhancedFutureBuilder(
+            future: auth.currentUserDetails(),
+            whenDone: (snapshotData) => buildDrawerHeader(user: snapshotData),
+            whenNotDone: buildDrawerHeader(done: false),
+            whenError: (error) => buildDrawerHeader(done: false),
+            rememberFutureResult: true,
+          ),
+          Expanded(child: drawerContent),
+          EnhancedFutureBuilder(
+            future: auth.currentUser(),
+            whenDone: (snapshotData) =>
+                buildDrawerBottomBar(context, isSignedId: true),
+            whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
+            whenError: (error) =>
+                buildDrawerBottomBar(context, isSignedId: false),
+            rememberFutureResult: true,
+          ),
+        ],
       ),
     );
   }
 }
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Container(
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
-  }
-}
-//dsadas

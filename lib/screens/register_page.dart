@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
+
+import 'package:opazar/screens/home_page.dart';
 
 class RegisterPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -167,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _validateInputs() {
     if (_formKey.currentState.validate()) {
-      print('validated');
+      // print('validated');
       _formKey.currentState.save();
       auth
           .register(
@@ -175,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
           .then((value) => Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => HomePage())));
     } else {
-      print('unValidated');
+      // print('unValidated');
       setState(() {
         _autoValidate = true;
       });

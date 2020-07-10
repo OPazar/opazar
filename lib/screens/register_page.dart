@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
 
@@ -173,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
           .register(
               email: emailValue, password: passwordValue, name: nameValue, sureName: sureNameValue)
           .then((value) => Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => DealerPage())));
+              context, MaterialPageRoute(builder: (context) => HomePage())));
     } else {
       print('unValidated');
       setState(() {

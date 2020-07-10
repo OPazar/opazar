@@ -1,4 +1,3 @@
-import 'package:async_builder/async_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/register_page.dart';
@@ -23,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
       initialValue: '',
+
       decoration: InputDecoration(
         hintText: 'Email',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),

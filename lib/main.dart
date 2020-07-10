@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/home_page.dart';
+import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
 
 void main() => runApp(MyApp());
 
+// deneme yeni123
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class TempPage extends StatelessWidget {
   Widget build(BuildContext context) {
     auth.currentUser().then((value) {
       if (value != null) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DealerPage()));
       } else {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
       }

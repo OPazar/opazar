@@ -24,9 +24,13 @@ class AuthService {
       assert(await user.getIdToken() != null);
 
       try {
-        String defaultImage = 'https://i.hizliresim.com/RU8rCT.png';
         await db.setUserDetails(
-            user.uid, User(email: email, name: name, sureName: sureName, imageUrl: defaultImage));
+            user.uid,
+            User(
+              email: email,
+              name: name,
+              sureName: sureName,
+            ));
         return user;
       } catch (_e) {
         Future.error(_e);
@@ -53,33 +57,8 @@ class AuthService {
     }
   }
 
-  // ignore: missing_return
-  Future<FirebaseUser> currentUser() async {
-    try {
-      FirebaseUser _currentUser = await _auth.currentUser();
-      if (_currentUser != null) {
-        return _currentUser;
-      } else {
-        Future.error(AuthError.NotSignedIn);
-      }
-    } catch (e) {
-      Future.error(AuthError.NotSignedIn);
-    }
-  }
-
-  // ignore: missing_return
-  Future<User> currentUserDetails() async {
-    try {
-      FirebaseUser _currentUser = await _auth.currentUser();
-      if (_currentUser != null) {
-        User userDetails = await db.getUser(_currentUser.uid);
-        return userDetails;
-      } else {
-        Future.error(AuthError.NotSignedIn);
-      }
-    } catch (e) {
-      Future.error(AuthError.NotSignedIn);
-    }
+  Future<FirebaseUser> currentUser() {
+    return _auth.currentUser();
   }
 
   Future<void> signOut() {
@@ -87,33 +66,35 @@ class AuthService {
   }
 }
 
-enum AuthError { UserNotFound, PasswordNotValid, NetworkError, NotSignedIn }
+enum AuthProblems { UserNotFound, PasswordNotValid, NetworkError }
 getAuthProblemType(dynamic e) {
-  AuthError errorType;
+  AuthProblems errorType;
 
   if (Platform.isAndroid) {
     switch (e.message) {
       case 'There is no user record corresponding to this identifier. The user may have been deleted.':
-        errorType = AuthError.UserNotFound;
+        errorType = AuthProblems.UserNotFound;
         break;
       case 'The password is invalid or the user does not have a password.':
-        errorType = AuthError.PasswordNotValid;
+        errorType = AuthProblems.PasswordNotValid;
         break;
       case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
-        errorType = AuthError.NetworkError;
+        errorType = AuthProblems.NetworkError;
         break;
     }
   } else if (Platform.isIOS) {
     switch (e.code) {
       case 'Error 17011':
-        errorType = AuthError.UserNotFound;
+        errorType = AuthProblems.UserNotFound;
         break;
       case 'Error 17009':
-        errorType = AuthError.PasswordNotValid;
+        errorType = AuthProblems.PasswordNotValid;
         break;
       case 'Error 17020':
-        errorType = AuthError.NetworkError;
+        errorType = AuthProblems.NetworkError;
         break;
+      default:
+        print('Case ${e.message} is not yet implemented');
     }
   }
   return Future.error(errorType);

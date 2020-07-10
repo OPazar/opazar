@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/home_page.dart';
+import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
 
 void main() => runApp(MyApp());
 
+// deneme yeni123
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

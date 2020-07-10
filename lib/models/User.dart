@@ -11,13 +11,7 @@ class User {
 
   DocumentReference referance;
 
-  User({uid, this.name, this.sureName, this.imageUrl, this.email}){
-    this._uid = uid ?? '';
-    this.name = this.name ?? '';
-    this.sureName = this.sureName ?? '';
-    this.imageUrl = this.imageUrl ?? '';
-    this.email = this.email ?? '';
-  }
+  User({uid, this.name, this.sureName, this.imageUrl, this.email}) : this._uid = uid;
 
   factory User.fromMap(Map data) {
     data = data ?? {};

@@ -1,5 +1,5 @@
-import 'package:async_builder/async_builder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -24,33 +24,28 @@ final dealerId = 'QFvm25W7Zrtj25Tj3DR2';
 class _DealerPageState extends State<DealerPage> {
   @override
   Widget build(BuildContext context) {
-    var detailBuilder = FutureBuilder(
+    var detailBuilder = EnhancedFutureBuilder(
       future: db.getDealer(dealerId),
-      builder: (context, snapshot) => AsyncBuilder<Dealer>(
-        future: db.getDealer(dealerId),
-        waiting: (context) => Text('Loading...'),
-        builder: (context, value) {
-          return Column(
-            children: <Widget>[
-              DealerDetails(dealer: value),
-              DealerShowcase(images: value.showcaseImageUrls)
-            ],
-          );
-        },
-        error: (context, error, stackTrace) => Text('Error! $error'),
-      ),
+      rememberFutureResult: false,
+      whenDone: (snapshotData) {
+        return Column(
+          children: <Widget>[
+            DealerDetails(dealer: snapshotData),
+            DealerShowcase(images: snapshotData.showcaseImageUrls)
+          ],
+        );
+      },
+      whenNotDone: Text('Loading...'),
+      whenError: (error) => Text('Error! $error'),
     );
 
-    var productsBuilder = FutureBuilder(
+    var productsBuilder = EnhancedFutureBuilder<List<Product>>(
       future: db.getProducts(dealerId),
-      builder: (context, snapshot) => AsyncBuilder<List<Product>>(
-        future: db.getProducts(dealerId),
-        waiting: (context) => Text('Loading...'),
-        builder: (context, value) => DealerProducts(products: value),
-        error: (context, error, stackTrace) => Text('Error! $error')
-      ),
+      rememberFutureResult: false,
+      whenDone: (snapshotData) => DealerProducts(products: snapshotData),
+      whenNotDone: Text('Loading'),
+      whenError: (error) => Text('Error! $error'),
     );
-
     return Scaffold(
         body: Container(
       child: ListView(
@@ -293,16 +288,11 @@ class DealerProducts extends StatelessWidget {
 }
 
 _settingModalBottomSheet(context) {
-  var commentsFuture = db.getDealerComments(dealerId);
-  var commentListBuilder = AsyncBuilder<List<Comment>>(
-    future: commentsFuture,
-    waiting: (context) => Text('Loading...'),
-    builder: (context, value) => CommentCardList(
-      comments: value,
-    ),
-    error: (context, error, stackTrace) => Text('Error! $error'),
-    closed: (context, value) => Text('$value (closed)'),
-  );
+  var commentsBuilder = EnhancedFutureBuilder<List<Comment>>(
+      future: db.getDealerComments(dealerId),
+      rememberFutureResult: false,
+      whenDone: (snapshotData) => CommentCardList(comments: snapshotData),
+      whenNotDone: null);
   showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -322,7 +312,7 @@ _settingModalBottomSheet(context) {
               onSaved: (String value) {},
             ),
           ),
-          commentListBuilder,
+          commentsBuilder
         ]);
       });
 }
@@ -390,12 +380,12 @@ class CommentCardList extends StatelessWidget {
     return Wrap(
       children: List.generate(comments.length, (index) {
         var currentComment = comments[index];
-        return AsyncBuilder<User>(
+        return EnhancedFutureBuilder<User>(
           future: db.getUser(currentComment.buyerUid),
-          waiting: (context) => Text('Loading...'),
-          builder: (context, value) => CommentCard(currentComment, value),
-          error: (context, error, stackTrace) => Text('Error! $error'),
-          closed: (context, value) => Text('$value (closed)'),
+          rememberFutureResult: false,
+          whenDone: (snapshotData) => CommentCard(currentComment, snapshotData),
+          whenNotDone: Text('Loading...'),
+          whenError: (error) => Text('Error! $error'),
         );
       }),
     );

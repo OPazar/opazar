@@ -3,6 +3,8 @@ import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
 
+import 'home_page.dart';
+
 class RegisterPage extends StatefulWidget {
   static String tag = 'login-page';
   @override

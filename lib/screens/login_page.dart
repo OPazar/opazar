@@ -3,6 +3,8 @@ import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/register_page.dart';
 import 'package:opazar/services/auth.dart';
 
+import 'home_page.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => new _LoginPageState();
@@ -103,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => DealerPage(),
+              builder: (context) => HomePage(),
             ));
       });
     } else {

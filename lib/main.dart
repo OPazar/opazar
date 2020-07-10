@@ -23,11 +23,9 @@ class TempPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     auth.currentUser().then((value) {
-      if (value != null) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-      } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
-      }
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+    }).catchError((_) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
     });
 
     var tempImage = CachedNetworkImage(

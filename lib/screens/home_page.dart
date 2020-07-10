@@ -57,7 +57,7 @@ class DrawerBar extends StatelessWidget {
               Container(
                 margin: EdgeInsets.all(8.0),
                 child: Text(
-                  user.name,
+                  '${user.name} ${user.sureName}',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -76,23 +76,14 @@ class DrawerBar extends StatelessWidget {
   }
 
   final Widget drawerContent = ListView(
-    // Important: Remove any padding from the ListView.
     padding: EdgeInsets.zero,
     children: <Widget>[
-      ListTile(
-        title: Text('Item 1'),
-        onTap: () {
-          // Update the state of the app.
-          // ...
-        },
-      ),
-      ListTile(
-        title: Text('Item 2'),
-        onTap: () {
-          // Update the state of the app.
-          // ...
-        },
-      ),
+      ListTile(title: Text('Tüm Ürünler')),
+      ListTile(title: Text('Sebzeler')),
+      ListTile(title: Text('Meyveler')),
+      ListTile(title: Text('Bitkiler')),
+      ListTile(title: Text('Yumurta')),
+      ListTile(title: Text('Süt & Süt Ürünleri')),
     ],
   );
 
@@ -101,16 +92,38 @@ class DrawerBar extends StatelessWidget {
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
       color: Colors.blue,
-      child: RaisedButton.icon(
-          onPressed: () {
-            if (isSignedId) {
-              auth.signOut(); // deneme amaçlı yapıldı
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
-            }
-          },
-          icon: Icon(FlutterIcons.exit_to_app_mdi),
-          label: Text('Çıkış')),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              child: RaisedButton.icon(
+                onPressed: () {},
+                icon: Icon(FlutterIcons.setting_ant),
+                label: Text('Düzenle'),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              child: RaisedButton.icon(
+                onPressed: () {
+                  if (isSignedId) {
+                    auth.signOut(); // deneme amaçlı yapıldı
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TempPage())); // deneme amaçlı yapıldı
+                  }
+                },
+                icon: Icon(FlutterIcons.exit_to_app_mdi),
+                label: Text('Çıkış'),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -123,6 +136,7 @@ class DrawerBar extends StatelessWidget {
             future: auth.currentUserDetails(),
             whenDone: (snapshotData) => buildDrawerHeader(user: snapshotData),
             whenNotDone: buildDrawerHeader(done: false),
+            whenError: (error) => buildDrawerHeader(done: false),
             rememberFutureResult: true,
           ),
           Expanded(child: drawerContent),
@@ -130,6 +144,7 @@ class DrawerBar extends StatelessWidget {
             future: auth.currentUser(),
             whenDone: (snapshotData) => buildDrawerBottomBar(context, isSignedId: true),
             whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
+            whenError: (error) => buildDrawerBottomBar(context, isSignedId: false),
             rememberFutureResult: true,
           ),
         ],

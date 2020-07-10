@@ -28,7 +28,6 @@ class DatabaseService {
   // ignore: missing_return
   Future<List<Product>> getProducts(String dealerId) async {
     try {
-      print('getProduct: start');
       var querySnapshot =
           await _db.collection('dealers').document(dealerId).collection('products').getDocuments();
 

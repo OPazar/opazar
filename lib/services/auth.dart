@@ -9,7 +9,6 @@ class AuthService {
   final _auth = FirebaseAuth.instance;
   final db = DatabaseService();
 
-  // ignore: missing_return
   Future<FirebaseUser> register({
     @required String email,
     @required String password,
@@ -29,45 +28,41 @@ class AuthService {
             user.uid, User(email: email, name: name, sureName: sureName, imageUrl: defaultImage));
         return user;
       } catch (_e) {
-        Future.error(_e);
+        return Future.error(_e);
       }
     } catch (e) {
-      getAuthProblemType(e);
+      return Future.error(getAuthProblemType(e));
     }
   }
 
-  // ignore: missing_return
   Future<FirebaseUser> login({
     @required String email,
     @required String password,
   }) async {
     try {
+      
       AuthResult result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
-
-      assert(user != null);
-
       return user;
+
     } catch (e) {
-      getAuthProblemType(e);
+      return Future.error(getAuthProblemType(e));
     }
   }
 
-  // ignore: missing_return
   Future<FirebaseUser> currentUser() async {
     try {
       FirebaseUser _currentUser = await _auth.currentUser();
       if (_currentUser != null) {
         return _currentUser;
       } else {
-        Future.error(AuthError.NotSignedIn);
+        return Future.error(AuthError.NotSignedIn);
       }
     } catch (e) {
-      Future.error(AuthError.NotSignedIn);
+      return Future.error(AuthError.NotSignedIn);
     }
   }
 
-  // ignore: missing_return
   Future<User> currentUserDetails() async {
     try {
       FirebaseUser _currentUser = await _auth.currentUser();
@@ -75,10 +70,10 @@ class AuthService {
         User userDetails = await db.getUser(_currentUser.uid);
         return userDetails;
       } else {
-        Future.error(AuthError.NotSignedIn);
+        return Future.error(AuthError.NotSignedIn);
       }
     } catch (e) {
-      Future.error(AuthError.NotSignedIn);
+      return Future.error(AuthError.NotSignedIn);
     }
   }
 
@@ -87,8 +82,8 @@ class AuthService {
   }
 }
 
-enum AuthError { UserNotFound, PasswordNotValid, NetworkError, NotSignedIn }
-getAuthProblemType(dynamic e) {
+enum AuthError { UserNotFound, PasswordNotValid, NetworkError, NotSignedIn, Other }
+AuthError getAuthProblemType(dynamic e) {
   AuthError errorType;
 
   if (Platform.isAndroid) {
@@ -102,6 +97,8 @@ getAuthProblemType(dynamic e) {
       case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
         errorType = AuthError.NetworkError;
         break;
+      default:
+        errorType = AuthError.Other;
     }
   } else if (Platform.isIOS) {
     switch (e.code) {
@@ -114,7 +111,9 @@ getAuthProblemType(dynamic e) {
       case 'Error 17020':
         errorType = AuthError.NetworkError;
         break;
+      default:
+        errorType = AuthError.Other;
     }
   }
-  return Future.error(errorType);
+  return errorType;
 }

@@ -325,7 +325,7 @@ class CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('user: ${user.toMap()}');
+    // print('user: ${user.toMap()}');
     return Container(
       child: Row(
         children: <Widget>[

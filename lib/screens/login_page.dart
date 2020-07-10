@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/dealer_page.dart';
+// import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/register_page.dart';
 import 'package:opazar/services/auth.dart';
-
-import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -97,16 +95,15 @@ class _LoginPageState extends State<LoginPage> {
 
   void _validateInputs() {
     if (_formKey.currentState.validate()) {
-      print('validated');
+      // print('validated');
       _formKey.currentState.save();
       //onayla
-      auth.login(email: emailValue, password: passwordValue).catchError((error) {}).then((value) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(),
-            ));
-      });
+      print('başladı');
+      auth.login(email: emailValue, password: passwordValue)
+      .then((value) => print('success $value'))
+      .catchError((error) => print('error $error'))
+      .whenComplete(() => print('bitti'));
+
     } else {
       setState(() {
         _autoValidate = true;

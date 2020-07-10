@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
+
+import 'screens/dealer_page.dart';
 
 void main() => runApp(MyApp());
 

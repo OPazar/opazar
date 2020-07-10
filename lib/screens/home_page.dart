@@ -1,7 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:opazar/screens/dealer_page.dart';
-import 'package:opazar/screens/product_page.dart';
+
+import '../main.dart';
+import '../services/auth.dart';
+import '../services/db.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key key}) : super(key: key);
@@ -9,79 +12,108 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("trying"),
-      ),
-      body: DefaultTabController(
-        length: 2,
-        child: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverAppBar(
-                expandedHeight: 100.0,
-                floating: false,
-                pinned: false,
-                flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
+      appBar: AppBar(title: Text('data'),),
+      drawer: _buildDrawer(context),
+      body: Container(),
+    );
+  }
 
-                    background: Image.network(
-                      "https://logos.flamingtext.com/City-Logos/Logo-Design-Pazar.png",
+  Widget _buildDrawer(BuildContext context) {
+    var drawerHeader = DrawerHeader(
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 75,
+            height: 75,
+            child: Center(
+              child: CachedNetworkImage(
+                imageUrl:
+                    "https://i.pinimg.com/originals/fd/e0/b2/fde0b24c55a7e84bdbf5d5a89fa9607c.jpg",
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
                       fit: BoxFit.cover,
-                    )),
-              ),
-              //çok fazla kaydırma var aga ya aklıma bir şey gelmedi
-              //bende yatıyom artık
-              SliverPersistentHeader(
-                delegate: _SliverAppBarDelegate(
-                  TabBar(
-                    labelColor: Colors.black87,
-                    unselectedLabelColor: Colors.grey,
-
-                    tabs: [
-                      Tab(icon: Icon(FlutterIcons.earlybirds_faw5d,), text: "Kümes"),
-                      Tab(icon: Icon(FlutterIcons.cow_mco), text: "Süt ve Süt Ürünleri",),
-                      //KATEGORİLERİ BİZ SEÇECEİĞİMİZ İÇİN EKLERİZ DİYE DÜŞÜNDÜM
-                    ],
+                    ),
                   ),
                 ),
-                pinned: true,
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              DealerPage(),
-              ProductPage(),
-            ],
+            ),
           ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.all(8.0),
+                child: Text(
+                  "User Name",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(8.0),
+                child: Text("User Email"),
+              ),
+            ],
+          )
+        ],
+      ),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+      ),
+    );
+
+    var drawerContent = ListView(
+      // Important: Remove any padding from the ListView.
+      padding: EdgeInsets.zero,
+      children: <Widget>[
+        ListTile(
+          title: Text('Item 1'),
+          onTap: () {
+            // Update the state of the app.
+            // ...
+          },
         ),
+        ListTile(
+          title: Text('Item 2'),
+          onTap: () {
+            // Update the state of the app.
+            // ...
+          },
+        ),
+      ],
+    );
+
+    var drawerBottomBar = Container(
+      padding: EdgeInsets.all(8.0),
+      width: double.infinity,
+      color: Colors.blue,
+      child: RaisedButton.icon(
+          onPressed: () {
+            var auth = AuthService();
+            var db = DatabaseService();
+            var user = auth.currentUser().then((value) {
+              db.getUser(value.uid).then((value) => value.imageUrl);
+            });
+            // auth.signOut(); // deneme amaçlı yapıldı
+            // Navigator.pushReplacement(context,
+            //     MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
+          },
+          icon: Icon(FlutterIcons.exit_to_app_mdi),
+          label: Text('Çıkış')),
+    );
+
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          drawerHeader,
+          Expanded(child: drawerContent),
+          drawerBottomBar,
+        ],
       ),
     );
   }
 }
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Container(
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
-  }
-}
-//dsadas

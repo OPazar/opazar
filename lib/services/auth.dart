@@ -93,8 +93,6 @@ getAuthProblemType(dynamic e) {
       case 'Error 17020':
         errorType = AuthProblems.NetworkError;
         break;
-      default:
-        print('Case ${e.message} is not yet implemented');
     }
   }
   return Future.error(errorType);

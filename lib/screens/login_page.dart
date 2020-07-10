@@ -1,4 +1,8 @@
+import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:opazar/screens/home_page.dart';
 // import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/register_page.dart';
 import 'package:opazar/services/auth.dart';
@@ -15,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
 
   String emailValue;
   String passwordValue;
+  BuildContext rootContext;
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +103,64 @@ class _LoginPageState extends State<LoginPage> {
       // print('validated');
       _formKey.currentState.save();
       //onayla
-      print('başladı');
-      auth.login(email: emailValue, password: passwordValue)
-      .then((value) => print('success $value'))
-      .catchError((error) => print('error $error'))
-      .whenComplete(() => print('bitti'));
-
+      logIn();
     } else {
       setState(() {
         _autoValidate = true;
       });
     }
+  }
+
+  logIn() {
+    Dialog doneDialog = Dialog(
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text('Giriş Başarılı'),
+            Icon(Icons.check),
+          ],
+        ),
+      ),
+    );
+
+    Dialog errorDialog = Dialog(
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text('Giriş Başarısız'),
+            Icon(Icons.close),
+          ],
+        ),
+      ),
+    );
+
+    Dialog loadingDialog = Dialog(
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text('Bekleyin'),
+            CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => EnhancedFutureBuilder(
+        future: auth.login(email: emailValue, password: passwordValue),
+        rememberFutureResult: false,
+        whenDone: (snapshotData) => doneDialog,
+        whenNotDone: loadingDialog,
+        whenError: (error) => errorDialog,
+      ),
+    );
   }
 }

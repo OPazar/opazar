@@ -28,26 +28,26 @@ class TempPage extends StatelessWidget {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
     });
 
-    var tempImage = CachedNetworkImage(
-      imageUrl: 'https://seeklogo.net/wp-content/uploads/2020/03/new-bmw-logo-2020-512x512.png',
-      imageBuilder: (context, imageProvider) => Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: imageProvider,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-      placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-      errorWidget: (context, url, error) => Icon(Icons.error),
-    );
+    // var tempImage = CachedNetworkImage(
+    //   imageUrl: 'https://seeklogo.net/wp-content/uploads/2020/03/new-bmw-logo-2020-512x512.png',
+    //   imageBuilder: (context, imageProvider) => Container(
+    //     decoration: BoxDecoration(
+    //       image: DecorationImage(
+    //         image: imageProvider,
+    //         fit: BoxFit.cover,
+    //       ),
+    //     ),
+    //   ),
+    //   placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+    //   errorWidget: (context, url, error) => Icon(Icons.error),
+    // );
 
     return Scaffold(
       body: Center(
         child: Container(
           width: 150,
           height: 150,
-          child: tempImage,
+          color: Colors.black,
         ),
       ),
     );

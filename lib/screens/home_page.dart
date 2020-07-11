@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
     var waitingWidget = Center(child: CircularProgressIndicator());
 
     return Scaffold(
-      appBar: AppBar(title: Text('asd')),
+      appBar: AppBar(title: Text('Tüm Ürünler')),
       drawer: DrawerBar(),
       body: EnhancedFutureBuilder(
         future: db.getAllProducts(),

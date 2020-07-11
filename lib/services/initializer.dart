@@ -15,10 +15,11 @@ class Initializer{
   User currentUser;
   List<Category> categories;
 
-  AuthService _auth = AuthService();
-  DatabaseService _db = DatabaseService();
 
   Future<void> load() async {
+    AuthService _auth = AuthService();
+    DatabaseService _db = DatabaseService();
+
     currentUser = await _auth.currentUserDetails();
     categories = await _db.getCategories();
   }

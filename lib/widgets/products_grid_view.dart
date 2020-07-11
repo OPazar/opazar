@@ -16,6 +16,8 @@ class ProductsGridView extends StatelessWidget {
     return GridView.count(
       crossAxisCount: 2,
       childAspectRatio: (4 / 5),
+      shrinkWrap: true,
+      primary: false,
       children: List.generate(dapList.length, (index) => dapList[index].getWidget(context)),
     );
   }

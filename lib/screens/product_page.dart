@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/User.dart';
+import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
 import 'package:opazar/widgets/products_grid_view.dart';
 
@@ -83,7 +84,9 @@ class ProductDetails extends StatelessWidget {
     );
 
     var productDealer = RawMaterialButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DealerPage(dealer: _dap.dealer)));
+      },
       child: Container(
         padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
@@ -142,6 +145,7 @@ class ProductDetails extends StatelessWidget {
       children: <Widget>[
         Container(height: 250.0, width: double.infinity, color: Colors.blue, child: productImage),
         Container(
+          margin: EdgeInsets.only(top: 8.0),
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

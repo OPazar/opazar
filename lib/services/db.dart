@@ -10,13 +10,14 @@ import 'package:opazar/widgets/products_grid_view.dart';
 class DatabaseService {
   static final DatabaseService _databaseService = DatabaseService._internal();
 
-  factory DatabaseService(){
+  factory DatabaseService() {
     return _databaseService;
   }
 
   DatabaseService._internal();
 
   final Firestore _db = Firestore.instance;
+  Initializer initializer = Initializer();
 
   //get product
   Future<Product> getProduct(String dealerId, String productId) async {
@@ -31,14 +32,28 @@ class DatabaseService {
   }
 
   //get products
-  Future<List<Product>> getProducts(String dealerId) async {
+  Future<List<DaP>> getProducts(Dealer dealer) async {
     try {
-      var querySnapshot = await _db.collection('dealers').document(dealerId).collection('products').getDocuments();
+      var categories = initializer.categories;
+      var querySnapshot = await _db.collection('dealers').document(dealer.uid).collection('products').getDocuments();
 
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
-        return List.generate(documentSnapshotList.length, (index) => Product.fromSnapshot(documentSnapshotList[index]));
+        List<DaP> dapList = List();
+        for (var snapshot in documentSnapshotList) {
+          var product = Product.fromSnapshot(snapshot);
+          var category = findCategory(product.categoryUid, categories);
+          if (category != null) {
+            var dap = DaP(dealer: dealer, product: product, category: category);
+            dapList.add(dap);
+          }
+        }
+        if (dapList.length > 0) {
+          return dapList;
+        } else {
+          return Future.error(DBError.noItems);
+        }
       } else {
         return Future.error(DBError.noItems);
       }
@@ -76,34 +91,43 @@ class DatabaseService {
 
   Future<List<DaP>> getAllProducts() async {
     List<DaP> dapList = List<DaP>();
-    var categories = Initializer().categories;
 
     try {
       var dealers = await getDealers();
-      if (dealers.length > 0) { // satıcı varsa
+      if (dealers.length > 0) {
+        // satıcı varsa
         for (Dealer dealer in dealers) {
-          var products = await getProducts(dealer.uid);
-          if (products.length > 0) { // satıcının ürünü varsa
-            for (Product product in products) {
-              for (var category in categories) {
-                if (product.categoryUid == category.uid) { //ürün kategorisi kategorilerde varsa
-                  var dap = DaP(dealer: dealer, product: product, category: category);
-                  dapList.add(dap);
-                  break;
-                }
-              }
+          var dealerDapList = await getProducts(dealer);
+          if (dealerDapList.length > 0) {
+            // satıcının ürünü varsa
+            for (var dap in dealerDapList) {
+              dapList.add(dap);
             }
-          } else {
-            return Future.error(DBError.noItems);
           }
         }
-        return dapList;
+        if (dapList.length > 0) {
+          return dapList;
+        } else
+          return Future.error(DBError.noItems);
       } else {
         return Future.error(DBError.noItems);
       }
     } catch (e) {
       return Future.error(e);
     }
+  }
+
+  Category findCategory(String categoryUid, List<Category> categories) {
+    if (categories.length > 0) {
+      for (var category in categories) {
+        if (categoryUid == category.uid) {
+          return category;
+        }
+      }
+    } else {
+      return null;
+    }
+    return null;
   }
 
   //get comments in dealer

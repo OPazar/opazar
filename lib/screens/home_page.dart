@@ -2,27 +2,33 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:opazar/models/Category.dart';
-import 'package:opazar/models/User.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
+import 'package:opazar/services/initializer.dart';
 import 'package:opazar/widgets/products_grid_view.dart';
 
 import '../main.dart';
 
 DatabaseService db = DatabaseService();
+Initializer initializer = Initializer();
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  static _HomePageState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<_HomePageState>());
+
   const HomePage({Key key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var errorWidget = Center(child: Icon(Icons.error));
     var waitingWidget = Center(child: CircularProgressIndicator());
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tüm Ürünler'),
-      ),
+      appBar: AppBar(title: Text('asd')),
       drawer: DrawerBar(),
       body: EnhancedFutureBuilder(
         future: db.getAllProducts(),
@@ -36,10 +42,8 @@ class HomePage extends StatelessWidget {
 }
 
 class DrawerBar extends StatelessWidget {
-  Widget buildDrawerHeader({User user, bool done = true}) {
-    if (!done) {
-      user = User();
-    }
+  Widget buildDrawerHeader() {
+    var user = initializer.currentUser;
     return DrawerHeader(
       child: Row(
         children: <Widget>[
@@ -88,25 +92,22 @@ class DrawerBar extends StatelessWidget {
     );
   }
 
-  Widget buildDrawerContent({List<Category> categories, bool done = true}) {
-    if (done) {
-      return Expanded(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: List.generate(
-              categories.length,
-              (index) => ListTile(
-                    title: Text(categories[index].name),
-                    onTap: () => null,
-                  )),
-        ),
-      );
-    } else {
-      return Expanded(child: Center(child: CircularProgressIndicator()));
-    }
+  Widget buildDrawerContent() {
+    var categories = initializer.categories;
+    return Expanded(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: List.generate(
+            categories.length,
+            (index) => ListTile(
+                  title: Text(categories[index].name),
+                  onTap: () => null,
+                )),
+      ),
+    );
   }
 
-  Widget buildDrawerBottomBar(BuildContext context, {bool isSignedId}) {
+  Widget buildDrawerBottomBar(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
@@ -128,11 +129,11 @@ class DrawerBar extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 2.0),
               child: RaisedButton.icon(
                 onPressed: () {
-                  if (isSignedId) {
+                  if (initializer.currentUser != null) {
                     auth.signOut(); // deneme amaçlı yapıldı
-                    Navigator.pushReplacement(
-                        context, MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
                   }
+                  Navigator.pushReplacement(
+                      context, MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
                 },
                 icon: Icon(FlutterIcons.exit_to_app_mdi),
                 label: Text('Çıkış'),
@@ -149,28 +150,9 @@ class DrawerBar extends StatelessWidget {
     return Drawer(
       child: Column(
         children: <Widget>[
-          EnhancedFutureBuilder(
-            future: auth.currentUserDetails(),
-            whenDone: (snapshotData) => buildDrawerHeader(user: snapshotData),
-            whenNotDone: buildDrawerHeader(done: false),
-            whenError: (error) => buildDrawerHeader(done: false),
-            rememberFutureResult: true,
-          ),
-//          Expanded(child: drawerContent),
-          EnhancedFutureBuilder(
-            future: db.getCategories(),
-            rememberFutureResult: true,
-            whenDone: (snapshotData) => buildDrawerContent(categories: snapshotData),
-            whenNotDone: buildDrawerContent(done: false),
-            whenError: (error) => buildDrawerContent(done: false),
-          ),
-          EnhancedFutureBuilder(
-            future: auth.currentUser(),
-            rememberFutureResult: true,
-            whenDone: (snapshotData) => buildDrawerBottomBar(context, isSignedId: true),
-            whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
-            whenError: (error) => buildDrawerBottomBar(context, isSignedId: false),
-          ),
+          buildDrawerHeader(),
+          buildDrawerContent(),
+          buildDrawerBottomBar(context),
         ],
       ),
     );

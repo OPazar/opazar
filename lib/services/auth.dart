@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/services/db.dart';
+import 'package:opazar/services/initializer.dart';
 
 class AuthService {
   final _auth = FirebaseAuth.instance;
@@ -43,6 +44,7 @@ class AuthService {
       
       AuthResult result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
+      Initializer().load();
       return user;
 
     } catch (e) {

@@ -22,6 +22,7 @@ dependencies:
   enhanced_future_builder: ^1.0.3
   connectivity: ^0.4.9
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,20 +4,25 @@ import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
+import 'package:opazar/services/initializer.dart';
 import 'package:opazar/widgets/products_grid_view.dart';
 
 class DatabaseService {
+  static final DatabaseService _databaseService = DatabaseService._internal();
+
+  factory DatabaseService(){
+    return _databaseService;
+  }
+
+  DatabaseService._internal();
+
   final Firestore _db = Firestore.instance;
 
   //get product
   Future<Product> getProduct(String dealerId, String productId) async {
     try {
-      var documentSnapshot = await _db
-          .collection('dealers')
-          .document(dealerId)
-          .collection('products')
-          .document(productId)
-          .get();
+      var documentSnapshot =
+          await _db.collection('dealers').document(dealerId).collection('products').document(productId).get();
 
       return Product.fromSnapshot(documentSnapshot);
     } catch (e) {
@@ -28,17 +33,12 @@ class DatabaseService {
   //get products
   Future<List<Product>> getProducts(String dealerId) async {
     try {
-      var querySnapshot = await _db
-          .collection('dealers')
-          .document(dealerId)
-          .collection('products')
-          .getDocuments();
+      var querySnapshot = await _db.collection('dealers').document(dealerId).collection('products').getDocuments();
 
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
-        return List.generate(documentSnapshotList.length,
-            (index) => Product.fromSnapshot(documentSnapshotList[index]));
+        return List.generate(documentSnapshotList.length, (index) => Product.fromSnapshot(documentSnapshotList[index]));
       } else {
         return Future.error(DBError.noItems);
       }
@@ -50,8 +50,7 @@ class DatabaseService {
   //get dealer
   Future<Dealer> getDealer(String dealerId) async {
     try {
-      var documentSnapshot =
-          await _db.collection('dealers').document(dealerId).get();
+      var documentSnapshot = await _db.collection('dealers').document(dealerId).get();
       return Dealer.fromSnapshot(documentSnapshot);
     } catch (e) {
       return Future.error(e);
@@ -66,8 +65,7 @@ class DatabaseService {
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
-        return List.generate(documentSnapshotList.length,
-            (index) => Dealer.fromSnapshot(documentSnapshotList[index]));
+        return List.generate(documentSnapshotList.length, (index) => Dealer.fromSnapshot(documentSnapshotList[index]));
       } else {
         return Future.error(DBError.noItems);
       }
@@ -78,16 +76,22 @@ class DatabaseService {
 
   Future<List<DaP>> getAllProducts() async {
     List<DaP> dapList = List<DaP>();
+    var categories = Initializer().categories;
 
     try {
       var dealers = await getDealers();
-      if (dealers.length > 0) {
+      if (dealers.length > 0) { // satıcı varsa
         for (Dealer dealer in dealers) {
           var products = await getProducts(dealer.uid);
-          if (products.length > 0) {
+          if (products.length > 0) { // satıcının ürünü varsa
             for (Product product in products) {
-              var dap = DaP(dealer: dealer, product: product);
-              dapList.add(dap);
+              for (var category in categories) {
+                if (product.categoryUid == category.uid) { //ürün kategorisi kategorilerde varsa
+                  var dap = DaP(dealer: dealer, product: product, category: category);
+                  dapList.add(dap);
+                  break;
+                }
+              }
             }
           } else {
             return Future.error(DBError.noItems);
@@ -105,16 +109,11 @@ class DatabaseService {
   //get comments in dealer
   Future<List<Comment>> getDealerComments(String dealerId) async {
     try {
-      var querySnapshot = await _db
-          .collection('dealers')
-          .document(dealerId)
-          .collection('comments')
-          .getDocuments();
+      var querySnapshot = await _db.collection('dealers').document(dealerId).collection('comments').getDocuments();
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
-        return List.generate(documentSnapshotList.length,
-            (index) => Comment.fromSnapshot(documentSnapshotList[index]));
+        return List.generate(documentSnapshotList.length, (index) => Comment.fromSnapshot(documentSnapshotList[index]));
       } else {
         return Future.error(DBError.noItems);
       }
@@ -124,8 +123,7 @@ class DatabaseService {
   }
 
   //get comments in product
-  Future<List<Comment>> getProductComments(
-      String dealerId, String productId) async {
+  Future<List<Comment>> getProductComments(String dealerId, String productId) async {
     try {
       var querySnapshot = await _db
           .collection('dealers')
@@ -137,8 +135,7 @@ class DatabaseService {
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
-        return List.generate(documentSnapshotList.length,
-            (index) => Comment.fromSnapshot(documentSnapshotList[index]));
+        return List.generate(documentSnapshotList.length, (index) => Comment.fromSnapshot(documentSnapshotList[index]));
       } else {
         return Future.error(DBError.noItems);
       }
@@ -175,8 +172,8 @@ class DatabaseService {
       var documentSnapshotList = querySnapshot.documents;
 
       if (documentSnapshotList.length > 0) {
-        return List.generate(documentSnapshotList.length,
-            (index) => Category.fromSnapshot(documentSnapshotList[index]));
+        return List.generate(
+            documentSnapshotList.length, (index) => Category.fromSnapshot(documentSnapshotList[index]));
       } else {
         return Future.error(DBError.noItems);
       }
@@ -184,7 +181,6 @@ class DatabaseService {
       return Future.error(e);
     }
   }
-
 }
 
 enum DBError {

@@ -13,8 +13,6 @@ DatabaseService db = DatabaseService();
 Initializer initializer = Initializer();
 
 class HomePage extends StatefulWidget {
-  static _HomePageState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<_HomePageState>());
-
   const HomePage({Key key}) : super(key: key);
 
   @override

@@ -8,9 +8,10 @@ class Product {
   String imageUrl;
   double price;
   String unit;
+  String categoryUid;
   DocumentReference referance;
 
-  Product({uid, this.name, this.imageUrl, this.price, this.unit}) : this._uid = uid;
+  Product({uid, this.name, this.imageUrl, this.price, this.unit, this.categoryUid}) : this._uid = uid;
 
   factory Product.fromMap(Map data) {
     data = data ?? {};
@@ -19,6 +20,7 @@ class Product {
       imageUrl: data['imageUrl'] ?? '',
       price: data['price'].toDouble() ?? 0,
       unit: data['unit'] ?? '',
+      categoryUid: data['categoryUid'] ?? '',
     );
   }
 
@@ -30,6 +32,7 @@ class Product {
       imageUrl: data['imageUrl'] ?? '',
       price: data['price'].toDouble() ?? 0,
       unit: data['unit'] ?? '',
+      categoryUid: data['categoryUid'] ?? '',
     );
   }
 
@@ -39,6 +42,7 @@ class Product {
       'imageUrl': imageUrl,
       'price': price,
       'unit': unit,
+      'categoryUid': categoryUid,
     };
   }
 }

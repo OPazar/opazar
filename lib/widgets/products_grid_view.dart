@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:opazar/models/Category.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/screens/dealer_page.dart';
@@ -15,8 +16,7 @@ class ProductsGridView extends StatelessWidget {
     return GridView.count(
       crossAxisCount: 2,
       childAspectRatio: (4 / 5),
-      children: List.generate(
-          dapList.length, (index) => dapList[index].getWidget(context)),
+      children: List.generate(dapList.length, (index) => dapList[index].getWidget(context)),
     );
   }
 }
@@ -24,25 +24,22 @@ class ProductsGridView extends StatelessWidget {
 class DaP {
   Dealer dealer;
   Product product;
+  Category category;
 
-  DaP({@required this.dealer, @required this.product});
+  DaP({@required this.dealer, @required this.product, @required this.category});
 
   Widget getWidget(BuildContext context) {
-    return RawMaterialButton(
-      onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    ProductPage(dap: DaP(dealer: dealer, product: product))));
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          color: Colors.grey[300],
-        ),
-        height: 250.0,
-        margin: EdgeInsets.all(8.0),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        color: Colors.grey[300],
+      ),
+      height: 250.0,
+      margin: EdgeInsets.all(8.0),
+      child: RawMaterialButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => ProductPage(dap: this)));
+        },
         child: Container(
           padding: EdgeInsets.all(8.0),
           child: Column(
@@ -65,8 +62,7 @@ class DaP {
                     ),
                     // height: 130,
                   ),
-                  placeholder: (context, url) =>
-                      Center(child: CircularProgressIndicator()),
+                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
               ),
@@ -84,24 +80,20 @@ class DaP {
                           Text('${product.price} ₺'),
                         ],
                       ),
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[Text(category.name)]),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           GestureDetector(
                               onTap: () {
-                                print('go go go');
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            DealerPage(dealer: dealer)));
+                                    context, MaterialPageRoute(builder: (context) => DealerPage(dealer: dealer)));
                               },
                               child: Text(dealer.name)),
                           Row(
                             children: <Widget>[
                               Text('5'),
-                              Icon(Icons.star,
-                                  size: 20, color: Colors.yellow[800]),
+                              Icon(Icons.star, size: 20, color: Colors.yellow[800]),
                             ],
                           )
                         ],

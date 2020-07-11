@@ -3,10 +3,19 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:opazar/models/User.dart';
+import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/services/db.dart';
 import 'package:opazar/services/initializer.dart';
 
 class AuthService {
+  static final AuthService _authService = AuthService._internal();
+
+  factory AuthService(){
+    return _authService;
+  }
+
+  AuthService._internal();
+
   final _auth = FirebaseAuth.instance;
   final db = DatabaseService();
 
@@ -44,7 +53,7 @@ class AuthService {
       
       AuthResult result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
-      Initializer().load();
+      await Initializer().load();
       return user;
 
     } catch (e) {
@@ -80,6 +89,8 @@ class AuthService {
   }
 
   Future<void> signOut() {
+    initializer.currentUser = null;
+    initializer.categories = null;
     return _auth.signOut();
   }
 }

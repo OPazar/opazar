@@ -4,19 +4,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:opazar/models/Comment.dart';
-import 'package:opazar/models/Dealer.dart';
-import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/services/db.dart';
 import 'package:opazar/widgets/products_grid_view.dart';
 
-Product _product;
-Dealer _dealer;
+DaP _dap;
 
 class ProductPage extends StatefulWidget {
-  DaP dap;
-
-  ProductPage({@required this.dap});
+  ProductPage({@required dap}) {
+    _dap = dap;
+  }
 
   @override
   _ProductPageState createState() => _ProductPageState();
@@ -25,11 +22,8 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
-    _product = widget.dap.product;
-    _dealer = widget.dap.dealer;
-
     return Scaffold(
-      appBar: AppBar(title: Text(_product.name)),
+      appBar: AppBar(title: Text(_dap.product.name)),
       body: ProductDetails(),
     );
   }
@@ -39,7 +33,7 @@ class ProductDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var productImage = CachedNetworkImage(
-      imageUrl: _product.imageUrl,
+      imageUrl: _dap.product.imageUrl,
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -53,7 +47,7 @@ class ProductDetails extends StatelessWidget {
     );
 
     var productName = Text(
-      _product.name,
+      _dap.product.name,
       style: TextStyle(
         fontSize: 32.0,
         fontWeight: FontWeight.w600,
@@ -88,34 +82,84 @@ class ProductDetails extends StatelessWidget {
       ),
     );
 
+    var productDealer = RawMaterialButton(
+      onPressed: () {},
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              height: 32,
+              width: 32,
+              child: CachedNetworkImage(
+                imageUrl: _dap.dealer.imageUrl,
+                imageBuilder: (context, imageProvider) => Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
+            ),
+            SizedBox(width: 5.0),
+            Text(
+              '${_dap.dealer.name}',
+              style: TextStyle(fontSize: 18.0),
+            ),
+          ],
+        ),
+      ),
+    );
+
     var productPrice = Text(
-      '${_product.price} ₺/${_product.unit}',
+      '${_dap.product.price} ₺/${_dap.product.unit}',
       style: TextStyle(
         fontSize: 18.0,
         fontWeight: FontWeight.normal,
       ),
     );
 
+    var productCategory = Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            '${_dap.category.name}',
+            style: TextStyle(fontSize: 18.0),
+          ),
+        ],
+      ),
+    );
+
     return Column(
       children: <Widget>[
+        Container(height: 250.0, width: double.infinity, color: Colors.blue, child: productImage),
         Container(
-            height: 250.0,
-            width: double.infinity,
-            color: Colors.blue,
-            child: productImage),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: productName),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: productRate),
-        Container(
-            width: double.infinity,
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(8.0),
-            child: productPrice),
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[productName, productCategory],
+              ),
+              productPrice
+            ],
+          ),
+        ),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: productRate),
+//        Container(
+//            width: double.infinity, alignment: Alignment.center, padding: EdgeInsets.all(8.0), child: productPrice),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: productDealer),
       ],
     );
   }
@@ -125,7 +169,7 @@ var db = DatabaseService();
 
 _settingModalBottomSheet(context) {
   var commentsBuilder = EnhancedFutureBuilder<List<Comment>>(
-      future: db.getProductComments(_dealer.uid, _product.uid),
+      future: db.getProductComments(_dap.dealer.uid, _dap.product.uid),
       rememberFutureResult: false,
       whenDone: (snapshotData) => CommentCardList(comments: snapshotData),
       whenNotDone: Center(child: CircularProgressIndicator()),
@@ -181,8 +225,7 @@ class CommentCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) =>
-                    Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Icon(Icons.error),
               )),
           Expanded(
@@ -195,9 +238,7 @@ class CommentCard extends StatelessWidget {
                 ),
                 child: Text('${user.name} ${user.sureName}:\n${comment.content}\npuanım: ${comment.rate}'),
               ),
-              decoration: BoxDecoration(
-                  color: Colors.greenAccent,
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
+              decoration: BoxDecoration(color: Colors.greenAccent, borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
           )
         ],
@@ -222,8 +263,7 @@ class CommentCardList extends StatelessWidget {
         return EnhancedFutureBuilder<User>(
           future: db.getUser(currentComment.buyerUid),
           rememberFutureResult: false,
-          whenDone: (snapshotData) =>
-              CommentCard(comment: currentComment, user: snapshotData),
+          whenDone: (snapshotData) => CommentCard(comment: currentComment, user: snapshotData),
           whenNotDone: Text('Loading...'),
           whenError: (error) => Text('Error! $error'),
         );

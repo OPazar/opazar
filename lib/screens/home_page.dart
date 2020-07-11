@@ -6,6 +6,7 @@ import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
 import 'package:opazar/services/initializer.dart';
 import 'package:opazar/widgets/products_grid_view.dart';
+import 'package:opazar/widgets/products_list_view.dart';
 
 import '../main.dart';
 
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         future: db.getAllProducts(),
         rememberFutureResult: false,
         whenNotDone: waitingWidget,
-        whenDone: (snapshotData) => ProductsGridView(dapList: snapshotData),
+        whenDone: (snapshotData) => ProductsListView(dapList: snapshotData),
         whenError: (error) => errorWidget,
       ),
     );

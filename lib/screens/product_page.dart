@@ -4,10 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:opazar/models/Comment.dart';
+import 'package:opazar/models/DaP.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
-import 'package:opazar/widgets/products_grid_view.dart';
 
 DaP _dap;
 

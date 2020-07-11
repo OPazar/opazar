@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:opazar/models/Category.dart';
 import 'package:opazar/models/Comment.dart';
+import 'package:opazar/models/DaP.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/services/initializer.dart';
-import 'package:opazar/widgets/products_grid_view.dart';
 
 class DatabaseService {
   static final DatabaseService _databaseService = DatabaseService._internal();

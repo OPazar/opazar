@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:opazar/models/Category.dart';
-import 'package:opazar/models/Dealer.dart';
-import 'package:opazar/models/Product.dart';
+import 'package:opazar/models/DaP.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/screens/product_page.dart';
 
@@ -18,19 +16,18 @@ class ProductsGridView extends StatelessWidget {
       childAspectRatio: (4 / 5),
       shrinkWrap: true,
       primary: false,
-      children: List.generate(dapList.length, (index) => dapList[index].getWidget(context)),
+      children: List.generate(dapList.length, (index) => GridViewItem(dap: dapList[index])),
     );
   }
 }
 
-class DaP {
-  Dealer dealer;
-  Product product;
-  Category category;
+class GridViewItem extends StatelessWidget {
+  final DaP dap;
 
-  DaP({@required this.dealer, @required this.product, @required this.category});
+  GridViewItem({@required this.dap});
 
-  Widget getWidget(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -50,7 +47,7 @@ class DaP {
               Container(
                 height: 130,
                 child: CachedNetworkImage(
-                  imageUrl: product.imageUrl,
+                  imageUrl: dap.product.imageUrl,
                   imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
@@ -77,21 +74,23 @@ class DaP {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Text(product.name),
+                          Text(dap.product.name),
 //                        Text('${product.unit} ${product.price} ₺'),
-                          Text('${product.price} ₺'),
+                          Text('${dap.product.price} ₺'),
                         ],
                       ),
-                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[Text(category.name)]),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[Text(dap.category.name)]),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           GestureDetector(
                               onTap: () {
                                 Navigator.push(
-                                    context, MaterialPageRoute(builder: (context) => DealerPage(dealer: dealer)));
+                                    context, MaterialPageRoute(builder: (context) => DealerPage(dealer: dap.dealer)));
                               },
-                              child: Text(dealer.name)),
+                              child: Text(dap.dealer.name)),
                           Row(
                             children: <Widget>[
                               Text('5'),

@@ -1,16 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:opazar/enums/status.dart';
 import 'package:opazar/models/Comment.dart';
+import 'package:opazar/models/DaP.dart';
 import 'package:opazar/models/Dealer.dart';
-import 'package:opazar/models/Product.dart';
-import 'package:opazar/models/User.dart';
 import 'package:opazar/services/auth.dart';
 import 'package:opazar/services/db.dart';
-
-Dealer _dealer;
+import 'package:opazar/widgets/comment_bottom_sheet.dart';
+import 'package:opazar/widgets/products_list_view.dart';
 
 class DealerPage extends StatefulWidget {
   final Dealer dealer;
@@ -27,15 +26,15 @@ var auth = AuthService();
 class _DealerPageState extends State<DealerPage> {
   @override
   Widget build(BuildContext context) {
-    _dealer = widget.dealer;
 
-    var productsBuilder = EnhancedFutureBuilder<List<Product>>(
-      future: db.getProducts(widget.dealer.uid),
+    var productsBuilder = EnhancedFutureBuilder<List<DaP>>(
+      future: db.getProducts(widget.dealer),
       rememberFutureResult: false,
-      whenDone: (snapshotData) => DealerProducts(products: snapshotData),
-      whenNotDone: Text('Loading'),
-      whenError: (error) => Text('Error! $error'),
+      whenDone: (snapshotData) => ProductsListView(dapList: snapshotData,status: Status.done),
+      whenNotDone: ProductsListView(dapList: null,status:Status.waiting),
+      whenError: (error) => ProductsListView(dapList: null,status:Status.error),
     );
+
     return Scaffold(
         appBar: AppBar(title: Text(widget.dealer.name)),
         body: Container(
@@ -100,7 +99,19 @@ class DealerDetails extends StatelessWidget {
       decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
       child: RawMaterialButton(
         onPressed: () {
-          _settingModalBottomSheet(context);
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext bc) {
+              return Column(children: <Widget>[
+                EnhancedFutureBuilder<List<Comment>>(
+                  future: db.getDealerComments(dealer.uid),
+                  rememberFutureResult: true,
+                  whenDone: (snapshotData) => CommentBottomSheet(comments: snapshotData, status: Status.done),
+                  whenNotDone: CommentBottomSheet(status: Status.waiting),
+                  whenError: (error) => CommentBottomSheet(status: Status.error),
+                )
+              ]);
+            });
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,214 +204,6 @@ class DealerShowcase extends StatelessWidget {
     return Container(
       child: showcase,
       padding: EdgeInsets.all(8.0),
-    );
-  }
-}
-
-class DealerProducts extends StatelessWidget {
-  final List<Product> products;
-
-  const DealerProducts({
-    this.products,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget productItem(Product product) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          color: Colors.grey[300],
-        ),
-        height: 250.0,
-        margin: EdgeInsets.all(8.0),
-        child: RawMaterialButton(
-          onPressed: () {},
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Container(
-                  height: 130,
-                  child: CachedNetworkImage(
-                    imageUrl: product.imageUrl,
-                    imageBuilder: (context, imageProvider) => Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: BoxFit.cover,
-                        ),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
-                        ),
-                      ),
-                      // height: 130,
-                    ),
-                    placeholder: (context, url) =>
-                        Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(top: 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(product.name),
-                            Text('${product.unit} ${product.price} ₺'),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            SizedBox(),
-                            Row(
-                              children: <Widget>[
-                                Text('5'),
-                                Icon(Icons.star,
-                                    size: 20, color: Colors.yellow[800]),
-                              ],
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (products != null && products.length > 0) {
-      return GridView.count(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        primary: false,
-        padding: EdgeInsets.all(4.0),
-        crossAxisCount: 2,
-        childAspectRatio: (8 / 9),
-        children: List.generate(
-            products.length, (index) => productItem(products[index])),
-      );
-    } else {
-      return Text('enought product');
-    }
-  }
-}
-
-_settingModalBottomSheet(context) {
-  var commentsBuilder = EnhancedFutureBuilder<List<Comment>>(
-      future: db.getDealerComments(_dealer.uid),
-      rememberFutureResult: false,
-      whenDone: (snapshotData) => CommentCardList(comments: snapshotData),
-      whenNotDone: null);
-  showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        return Column(children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(2),
-            child: TextFormField(
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(30),
-              ],
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(),
-                filled: true,
-                icon: Icon(Icons.comment),
-                labelText: 'Yorum Yap',
-              ),
-              onSaved: (String value) {},
-            ),
-          ),
-          commentsBuilder
-        ]);
-      });
-}
-
-class CommentCard extends StatelessWidget {
-  final Comment comment;
-  final User user;
-
-  CommentCard(this.comment, this.user);
-
-  @override
-  Widget build(BuildContext context) {
-    // print('user: ${user.toMap()}');
-    return Container(
-      child: Row(
-        children: <Widget>[
-          Container(
-              margin: EdgeInsets.only(left: 10.0),
-              width: 50,
-              height: 50,
-              child: CachedNetworkImage(
-                imageUrl: user.imageUrl,
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                placeholder: (context, url) =>
-                    Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-              )),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(10),
-              margin: EdgeInsets.all(10),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: 50.0,
-                ),
-                child: Text(
-                    '${user.name}:\n${comment.content}\npuanım: ${comment.rate}'),
-              ),
-              decoration: BoxDecoration(
-                  color: Colors.greenAccent,
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class CommentCardList extends StatelessWidget {
-  final List<Comment> comments;
-
-  const CommentCardList({
-    Key key,
-    @required this.comments,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      children: List.generate(comments.length, (index) {
-        var currentComment = comments[index];
-        return EnhancedFutureBuilder<User>(
-          future: db.getUser(currentComment.buyerUid),
-          rememberFutureResult: false,
-          whenDone: (snapshotData) => CommentCard(currentComment, snapshotData),
-          whenNotDone: Text('Loading...'),
-          whenError: (error) => Text('Error! $error'),
-        );
-      }),
     );
   }
 }

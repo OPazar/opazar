@@ -2,44 +2,44 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:opazar/models/User.dart';
+import 'package:opazar/enums/status.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
-import 'package:opazar/widgets/products_grid_view.dart';
+import 'package:opazar/services/initializer.dart';
+import 'package:opazar/widgets/products_list_view.dart';
 
 import '../main.dart';
 
 DatabaseService db = DatabaseService();
+Initializer initializer = Initializer();
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    var errorWidget = Center(child: Icon(Icons.error));
-    var waitingWidget = Center(child: CircularProgressIndicator());
+  _HomePageState createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tüm Ürünler'),
-      ),
+      appBar: AppBar(title: Text('Tüm Ürünler')),
       drawer: DrawerBar(),
       body: EnhancedFutureBuilder(
         future: db.getAllProducts(),
         rememberFutureResult: false,
-        whenNotDone: waitingWidget,
-        whenDone: (snapshotData) => ProductsGridView(dapList: snapshotData),
-        whenError: (error) => errorWidget,
+        whenNotDone: ProductsListView(status: Status.waiting),
+        whenDone: (snapshotData) => ProductsListView(dapList: snapshotData, status: Status.done),
+        whenError: (error) => ProductsListView(status: Status.error),
       ),
     );
   }
 }
 
 class DrawerBar extends StatelessWidget {
-  Widget buildDrawerHeader({User user, bool done = true}) {
-    if (!done) {
-      user = User();
-    }
+  Widget buildDrawerHeader() {
+    var user = initializer.currentUser;
     return DrawerHeader(
       child: Row(
         children: <Widget>[
@@ -58,8 +58,7 @@ class DrawerBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) =>
-                    Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Icon(Icons.error),
               ),
             ),
@@ -89,19 +88,22 @@ class DrawerBar extends StatelessWidget {
     );
   }
 
-  final Widget drawerContent = ListView(
-    padding: EdgeInsets.zero,
-    children: <Widget>[
-      ListTile(title: Text('Tüm Ürünler')),
-      ListTile(title: Text('Sebzeler')),
-      ListTile(title: Text('Meyveler')),
-      ListTile(title: Text('Bitkiler')),
-      ListTile(title: Text('Yumurta')),
-      ListTile(title: Text('Süt & Süt Ürünleri')),
-    ],
-  );
+  Widget buildDrawerContent() {
+    var categories = initializer.categories;
+    return Expanded(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: List.generate(
+            categories.length,
+            (index) => ListTile(
+                  title: Text(categories[index].name),
+                  onTap: () => null,
+                )),
+      ),
+    );
+  }
 
-  Widget buildDrawerBottomBar(BuildContext context, {bool isSignedId}) {
+  Widget buildDrawerBottomBar(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
@@ -123,14 +125,11 @@ class DrawerBar extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 2.0),
               child: RaisedButton.icon(
                 onPressed: () {
-                  if (isSignedId) {
+                  if (initializer.currentUser != null) {
                     auth.signOut(); // deneme amaçlı yapıldı
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                TempPage())); // deneme amaçlı yapıldı
                   }
+                  Navigator.pushReplacement(
+                      context, MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
                 },
                 icon: Icon(FlutterIcons.exit_to_app_mdi),
                 label: Text('Çıkış'),
@@ -147,23 +146,9 @@ class DrawerBar extends StatelessWidget {
     return Drawer(
       child: Column(
         children: <Widget>[
-          EnhancedFutureBuilder(
-            future: auth.currentUserDetails(),
-            whenDone: (snapshotData) => buildDrawerHeader(user: snapshotData),
-            whenNotDone: buildDrawerHeader(done: false),
-            whenError: (error) => buildDrawerHeader(done: false),
-            rememberFutureResult: true,
-          ),
-          Expanded(child: drawerContent),
-          EnhancedFutureBuilder(
-            future: auth.currentUser(),
-            whenDone: (snapshotData) =>
-                buildDrawerBottomBar(context, isSignedId: true),
-            whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
-            whenError: (error) =>
-                buildDrawerBottomBar(context, isSignedId: false),
-            rememberFutureResult: true,
-          ),
+          buildDrawerHeader(),
+          buildDrawerContent(),
+          buildDrawerBottomBar(context),
         ],
       ),
     );

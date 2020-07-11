@@ -1,11 +1,12 @@
+import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
 
-import 'package:opazar/screens/home_page.dart';
-
 class RegisterPage extends StatefulWidget {
   static String tag = 'login-page';
+
   @override
   _RegisterPageState createState() => new _RegisterPageState();
 }
@@ -156,8 +157,7 @@ class _RegisterPageState extends State<RegisterPage> {
               Center(
                   child: GestureDetector(
                 child: Text('Buraya tıklayarak giriş yapabilirsin'),
-                onTap: () => Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => LoginPage())),
+                onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage())),
               )),
             ],
           ),
@@ -170,17 +170,80 @@ class _RegisterPageState extends State<RegisterPage> {
     if (_formKey.currentState.validate()) {
       // print('validated');
       _formKey.currentState.save();
-      auth
-          .register(
-              email: emailValue, password: passwordValue, name: nameValue, sureName: sureNameValue)
-          .then((value) => Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomePage())));
+      register();
     } else {
       // print('unValidated');
       setState(() {
         _autoValidate = true;
       });
     }
+  }
+
+  void register() {
+    AlertDialog successAlert = AlertDialog(
+      title: Text('Kayıt Başarılı'),
+      content: Text('Kayıt oldunuz giriş yapabilirsiniz.'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Giriş Yap'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+          },
+        ),
+      ],
+    );
+
+    Dialog waitingAlert = Dialog(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 32.0),
+            child: CircularProgressIndicator(),
+          ),
+        ],
+      ),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => EnhancedFutureBuilder(
+        future: auth.register(email: emailValue, password: passwordValue, name: nameValue, sureName: sureNameValue),
+        rememberFutureResult: false,
+        whenDone: (snapshotData) => successAlert,
+        whenNotDone: waitingAlert,
+        whenError: (error) => buildErrorAlert(error),
+      ),
+    );
+  }
+
+  AlertDialog buildErrorAlert(authError) {
+    String errorContent;
+
+    switch (authError) {
+      case AuthError.NetworkError:
+        errorContent = 'İnternet bağlantınızı kontrol ediniz.';
+        break;
+      case AuthError.ExistingEmail:
+        errorContent = 'Hesap zaten kayıtlı.';
+        break;
+      default:
+        errorContent = 'Bir hatta oluştu. Lütfen tekrar deneyin.';
+    }
+
+    AlertDialog errorAlert = AlertDialog(
+      title: Text('Kayıt Başarısız'),
+      content: Text(errorContent),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Kapat'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ],
+    );
+    return errorAlert;
   }
 
   bool _submittable() {

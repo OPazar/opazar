@@ -1,18 +1,23 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
+import 'package:opazar/services/initializer.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blueGrey),
-      home: TempPage(),
-    );
+        debugShowCheckedModeBanner: false, theme: ThemeData(primarySwatch: Colors.blueGrey), home: TempPage());
   }
 }
 
@@ -21,10 +26,30 @@ class TempPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    auth.currentUser().then((value) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-    }).catchError((_) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+    Connectivity().checkConnectivity().then((value) async {
+      if (value == ConnectivityResult.none) {
+        print('Bağlantı yok');
+        showDialog(
+          context: context,
+          child: AlertDialog(
+            title: Text('Bağlantı Yok'),
+            content: Text('İnternet bağlantınızı kontrol edip tekrar deneyin.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Kapat'),
+                onPressed: () => SystemNavigator.pop(),
+              ),
+            ],
+          ),
+        );
+      } else {
+        auth.currentUser().then((value) async {
+          await Initializer().load();
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+        }).catchError((_) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+        });
+      }
     });
 
     return Scaffold(

@@ -3,12 +3,14 @@ import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:opazar/enums/status.dart';
 import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/DaP.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/services/auth.dart';
 import 'package:opazar/services/db.dart';
+import 'package:opazar/widgets/comment_bottom_sheet.dart';
 import 'package:opazar/widgets/products_grid_view.dart';
 
 Dealer _dealer;
@@ -101,7 +103,19 @@ class DealerDetails extends StatelessWidget {
       decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
       child: RawMaterialButton(
         onPressed: () {
-          _settingModalBottomSheet(context);
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext bc) {
+              return Column(children: <Widget>[
+                EnhancedFutureBuilder<List<Comment>>(
+                  future: db.getDealerComments(dealer.uid),
+                  rememberFutureResult: true,
+                  whenDone: (snapshotData) => CommentBottomSheet(comments: snapshotData, status: Status.done),
+                  whenNotDone: CommentBottomSheet(status: Status.waiting),
+                  whenError: (error) => CommentBottomSheet(status: Status.error),
+                )
+              ]);
+            });
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

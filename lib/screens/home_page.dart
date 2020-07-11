@@ -2,10 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:opazar/enums/status.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
 import 'package:opazar/services/initializer.dart';
-import 'package:opazar/widgets/products_grid_view.dart';
 import 'package:opazar/widgets/products_list_view.dart';
 
 import '../main.dart';
@@ -23,18 +23,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    var errorWidget = Center(child: Icon(Icons.error));
-    var waitingWidget = Center(child: CircularProgressIndicator());
-
     return Scaffold(
       appBar: AppBar(title: Text('Tüm Ürünler')),
       drawer: DrawerBar(),
       body: EnhancedFutureBuilder(
         future: db.getAllProducts(),
         rememberFutureResult: false,
-        whenNotDone: waitingWidget,
-        whenDone: (snapshotData) => ProductsListView(dapList: snapshotData),
-        whenError: (error) => errorWidget,
+        whenNotDone: ProductsListView(status: Status.waiting),
+        whenDone: (snapshotData) => ProductsListView(dapList: snapshotData, status: Status.done),
+        whenError: (error) => ProductsListView(status: Status.error),
       ),
     );
   }

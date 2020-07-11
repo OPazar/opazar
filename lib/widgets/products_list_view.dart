@@ -1,21 +1,29 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:opazar/enums/status.dart';
 import 'package:opazar/models/DaP.dart';
 import 'package:opazar/screens/product_page.dart';
 
 class ProductsListView extends StatelessWidget {
   final List<DaP> dapList;
+  final Status status;
 
-  ProductsListView({@required this.dapList});
+  ProductsListView({this.dapList, @required this.status});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.all(8.0),
-      shrinkWrap: true,
-      primary: false,
-      children: List.generate(dapList.length, (index) => ListViewItem(dap: dapList[index])),
-    );
+    if (status == Status.done) {
+      return ListView(
+        padding: EdgeInsets.all(8.0),
+        shrinkWrap: true,
+        primary: false,
+        children: List.generate(dapList.length, (index) => ListViewItem(dap: dapList[index])),
+      );
+    } else if (status == Status.waiting) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return Center(child: Icon(Icons.error));
+    }
   }
 }
 
@@ -77,7 +85,7 @@ class ListViewItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(dap.product.unit, style: TextStyle(fontSize: 16.0)),
-                          Text(dap.product.priceText, style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.w700)),
+                          Text(dap.product.priceText, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w700)),
                         ],
                       ),
                     ],

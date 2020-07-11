@@ -71,7 +71,7 @@ class ListViewItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(dap.product.unit, style: TextStyle(fontSize: 16.0)),
-                      Text(dap.product.price.toStringAsFixed(2).replaceAll('.', ',')+'TL', style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.w700)),
+                      Text(dap.product.priceText, style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ],

@@ -11,6 +11,8 @@ class Product {
   String categoryUid;
   DocumentReference referance;
 
+  String get priceText => price.toStringAsFixed(2).replaceAll('.', ',') + ' TL';
+
   Product({uid, this.name, this.imageUrl, this.price, this.unit, this.categoryUid}) : this._uid = uid;
 
   factory Product.fromMap(Map data) {

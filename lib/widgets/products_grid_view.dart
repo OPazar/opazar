@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/screens/dealer_page.dart';
+import 'package:opazar/screens/product_page.dart';
 
 class ProductsGridView extends StatelessWidget {
   final List<DaP> dapList;
@@ -27,81 +28,90 @@ class DaP {
   DaP({@required this.dealer, @required this.product});
 
   Widget getWidget(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        color: Colors.grey[300],
-      ),
-      height: 250.0,
-      margin: EdgeInsets.all(8.0),
+    return RawMaterialButton(
+      onPressed: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    ProductPage(dap: DaP(dealer: dealer, product: product))));
+      },
       child: Container(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Container(
-              height: 130,
-              child: CachedNetworkImage(
-                imageUrl: product.imageUrl,
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          color: Colors.grey[300],
+        ),
+        height: 250.0,
+        margin: EdgeInsets.all(8.0),
+        child: Container(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Container(
+                height: 130,
+                child: CachedNetworkImage(
+                  imageUrl: product.imageUrl,
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
                     ),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    ),
+                    // height: 130,
                   ),
-                  // height: 130,
+                  placeholder: (context, url) =>
+                      Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
-                placeholder: (context, url) =>
-                    Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
-            ),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.only(top: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(product.name),
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(top: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(product.name),
 //                        Text('${product.unit} ${product.price} ₺'),
-                        Text('${product.price} ₺'),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        GestureDetector(
-                            onTap: () {
-                              print('go go go');
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          DealerPage(dealer: dealer)));
-                            },
-                            child: Text(dealer.name)),
-                        Row(
-                          children: <Widget>[
-                            Text('5'),
-                            Icon(Icons.star,
-                                size: 20, color: Colors.yellow[800]),
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
+                          Text('${product.price} ₺'),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          GestureDetector(
+                              onTap: () {
+                                print('go go go');
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            DealerPage(dealer: dealer)));
+                              },
+                              child: Text(dealer.name)),
+                          Row(
+                            children: <Widget>[
+                              Text('5'),
+                              Icon(Icons.star,
+                                  size: 20, color: Colors.yellow[800]),
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

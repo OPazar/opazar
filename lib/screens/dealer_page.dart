@@ -7,8 +7,10 @@ import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
 import 'package:opazar/models/User.dart';
+import 'package:opazar/screens/product_page.dart';
 import 'package:opazar/services/auth.dart';
 import 'package:opazar/services/db.dart';
+import 'package:opazar/widgets/products_grid_view.dart';
 
 Dealer _dealer;
 
@@ -215,7 +217,11 @@ class DealerProducts extends StatelessWidget {
         height: 250.0,
         margin: EdgeInsets.all(8.0),
         child: RawMaterialButton(
-          onPressed: () {},
+          onPressed: () {Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ProductPage(dap: DaP(dealer: _dealer, product: product))));},
           child: Container(
             padding: EdgeInsets.all(8.0),
             child: Column(

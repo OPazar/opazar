@@ -19,8 +19,8 @@ dependencies:
   cached_network_image: ^2.2.0+1
   flutter_icons: ^1.1.0
   provider: ^4.2.0
-  # async_builder: ^1.2.0
   enhanced_future_builder: ^1.0.3
+  connectivity: ^0.4.9
 
 dev_dependencies:
   flutter_test:

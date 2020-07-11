@@ -1,4 +1,6 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:opazar/screens/home_page.dart';
 import 'package:opazar/screens/login_page.dart';
 import 'package:opazar/services/auth.dart';
@@ -19,11 +21,30 @@ class TempPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    auth.currentUser().then((value) async {
-      await Initializer().load();
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-    }).catchError((_) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+    Connectivity().checkConnectivity().then((value) async {
+      if (value == ConnectivityResult.none) {
+        print('Bağlantı yok');
+        showDialog(
+          context: context,
+          child: AlertDialog(
+            title: Text('Bağlantı Yok'),
+            content: Text('İnternet bağlantınızı kontrol edip tekrar deneyin.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Kapat'),
+                onPressed: () => SystemNavigator.pop(),
+              ),
+            ],
+          ),
+        );
+      } else {
+        auth.currentUser().then((value) async {
+          await Initializer().load();
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+        }).catchError((_) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+        });
+      }
     });
 
     return Scaffold(

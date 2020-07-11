@@ -122,7 +122,7 @@ class ProductDetails extends StatelessWidget {
     );
 
     var productPrice = Text(
-      '${_dap.product.price} ₺/${_dap.product.unit}',
+      '${_dap.product.priceText}/${_dap.product.unit}',
       style: TextStyle(
         fontSize: 18.0,
         fontWeight: FontWeight.normal,

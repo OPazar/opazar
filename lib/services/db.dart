@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:opazar/models/Category.dart';
 import 'package:opazar/models/Comment.dart';
 import 'package:opazar/models/Dealer.dart';
 import 'package:opazar/models/Product.dart';
@@ -58,7 +59,6 @@ class DatabaseService {
   }
 
   //get dealers
-  // ignore: missing_return
   Future<List<Dealer>> getDealers() async {
     try {
       var querySnapshot = await _db.collection('dealers').getDocuments();
@@ -166,6 +166,25 @@ class DatabaseService {
       return Future.error(e);
     }
   }
+
+  //get categories
+  Future<List<Category>> getCategories() async {
+    try {
+      var querySnapshot = await _db.collection('categories').getDocuments();
+
+      var documentSnapshotList = querySnapshot.documents;
+
+      if (documentSnapshotList.length > 0) {
+        return List.generate(documentSnapshotList.length,
+            (index) => Category.fromSnapshot(documentSnapshotList[index]));
+      } else {
+        return Future.error(DBError.noItems);
+      }
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
+
 }
 
 enum DBError {

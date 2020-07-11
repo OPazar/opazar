@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:opazar/models/Category.dart';
 import 'package:opazar/models/User.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
@@ -13,7 +14,6 @@ DatabaseService db = DatabaseService();
 
 class HomePage extends StatelessWidget {
   const HomePage({Key key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     var errorWidget = Center(child: Icon(Icons.error));
@@ -58,8 +58,7 @@ class DrawerBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) =>
-                    Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => Icon(Icons.error),
               ),
             ),
@@ -89,17 +88,23 @@ class DrawerBar extends StatelessWidget {
     );
   }
 
-  final Widget drawerContent = ListView(
-    padding: EdgeInsets.zero,
-    children: <Widget>[
-      ListTile(title: Text('Tüm Ürünler')),
-      ListTile(title: Text('Sebzeler')),
-      ListTile(title: Text('Meyveler')),
-      ListTile(title: Text('Bitkiler')),
-      ListTile(title: Text('Yumurta')),
-      ListTile(title: Text('Süt & Süt Ürünleri')),
-    ],
-  );
+  Widget buildDrawerContent({List<Category> categories, bool done = true}) {
+    if (done) {
+      return Expanded(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: List.generate(
+              categories.length,
+              (index) => ListTile(
+                    title: Text(categories[index].name),
+                    onTap: () => null,
+                  )),
+        ),
+      );
+    } else {
+      return Expanded(child: Center(child: CircularProgressIndicator()));
+    }
+  }
 
   Widget buildDrawerBottomBar(BuildContext context, {bool isSignedId}) {
     return Container(
@@ -126,10 +131,7 @@ class DrawerBar extends StatelessWidget {
                   if (isSignedId) {
                     auth.signOut(); // deneme amaçlı yapıldı
                     Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                TempPage())); // deneme amaçlı yapıldı
+                        context, MaterialPageRoute(builder: (context) => TempPage())); // deneme amaçlı yapıldı
                   }
                 },
                 icon: Icon(FlutterIcons.exit_to_app_mdi),
@@ -154,15 +156,20 @@ class DrawerBar extends StatelessWidget {
             whenError: (error) => buildDrawerHeader(done: false),
             rememberFutureResult: true,
           ),
-          Expanded(child: drawerContent),
+//          Expanded(child: drawerContent),
+          EnhancedFutureBuilder(
+            future: db.getCategories(),
+            rememberFutureResult: true,
+            whenDone: (snapshotData) => buildDrawerContent(categories: snapshotData),
+            whenNotDone: buildDrawerContent(done: false),
+            whenError: (error) => buildDrawerContent(done: false),
+          ),
           EnhancedFutureBuilder(
             future: auth.currentUser(),
-            whenDone: (snapshotData) =>
-                buildDrawerBottomBar(context, isSignedId: true),
-            whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
-            whenError: (error) =>
-                buildDrawerBottomBar(context, isSignedId: false),
             rememberFutureResult: true,
+            whenDone: (snapshotData) => buildDrawerBottomBar(context, isSignedId: true),
+            whenNotDone: buildDrawerBottomBar(context, isSignedId: false),
+            whenError: (error) => buildDrawerBottomBar(context, isSignedId: false),
           ),
         ],
       ),

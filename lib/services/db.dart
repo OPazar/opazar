@@ -52,10 +52,10 @@ class DatabaseService {
         if (dapList.length > 0) {
           return dapList;
         } else {
-          return Future.error(DBError.noItems);
+          return Future.error(DBError.noProduct);
         }
       } else {
-        return Future.error(DBError.noItems);
+        return Future.error(DBError.noProduct);
       }
     } catch (e) {
       return Future.error(e);
@@ -82,7 +82,7 @@ class DatabaseService {
       if (documentSnapshotList.length > 0) {
         return List.generate(documentSnapshotList.length, (index) => Dealer.fromSnapshot(documentSnapshotList[index]));
       } else {
-        return Future.error(DBError.noItems);
+        return Future.error(DBError.noDealer);
       }
     } catch (e) {
       return Future.error(e);
@@ -108,12 +108,65 @@ class DatabaseService {
         if (dapList.length > 0) {
           return dapList;
         } else
-          return Future.error(DBError.noItems);
+          return Future.error(DBError.noProduct);
       } else {
-        return Future.error(DBError.noItems);
+        return Future.error(DBError.noDealer);
       }
     } catch (e) {
       return Future.error(e);
+    }
+  }
+
+  Future<List<DaP>> getProductsWithCategory(String categoryUid) async {
+    print('başla');
+    try {
+      List<DaP> dapList = List();
+
+      print('satıcılar alınıyor');
+      var dealers = await getDealers();
+      print('satıcılar alındı');
+      if (dealers.length > 0) {
+        print('satıcılar boş değil');
+        for (var dealer in dealers) {
+          print('${dealer.name} satıcısının ürünleri alınıyor');
+          var querySnapshot =
+              await _db
+                .collection('dealers')
+                .document(dealer.uid)
+                .collection('products')
+                .where('categoryUid',isEqualTo: categoryUid)
+                .getDocuments();
+          print('${dealer.name} satıcısının ürünleri alındı');
+
+          var productSnapshotList = querySnapshot.documents;
+          if(productSnapshotList.isEmpty){
+            print('${dealer.name} satıcısının ürünü yok başa dönülüyor');
+            continue;
+          }else{
+            for(var productSnapshot in productSnapshotList){
+              var product = Product.fromSnapshot(productSnapshot);
+              print('${dealer.name} satıcısının ${product.name} ürünüyle işlem yapılıyor');
+              var dap = DaP(dealer: dealer, product: product, category: findCategory(categoryUid, initializer.categories));
+              print('${dealer.name} satıcısının ${product.name} ürünüyle işlem yapıldı');
+              dapList.add(dap);
+              print('${dealer.name} satıcısının ${product.name} ürünü listeye eklendi');
+            }
+          }
+
+        }
+        print('liste kontrol ediliyor');
+        if(dapList.isNotEmpty){
+          print('liste boş değil');
+          return dapList;
+        }else{
+          return Future.error(DBError.noProduct);
+        }
+      }else{
+        return Future.error(DBError.noDealer);
+      }
+    } catch (e) {
+      print('beklenmeyen bir hata oluştu : $e');
+      Future.error(e);
     }
   }
 
@@ -139,7 +192,7 @@ class DatabaseService {
       if (documentSnapshotList.length > 0) {
         return List.generate(documentSnapshotList.length, (index) => Comment.fromSnapshot(documentSnapshotList[index]));
       } else {
-        return Future.error(DBError.noItems);
+        return Future.error(DBError.noComment);
       }
     } catch (e) {
       return Future.error(e);
@@ -161,7 +214,7 @@ class DatabaseService {
       if (documentSnapshotList.length > 0) {
         return List.generate(documentSnapshotList.length, (index) => Comment.fromSnapshot(documentSnapshotList[index]));
       } else {
-        return Future.error(DBError.noItems);
+        return Future.error(DBError.noComment);
       }
     } catch (e) {
       return Future.error(e);
@@ -199,7 +252,7 @@ class DatabaseService {
         return List.generate(
             documentSnapshotList.length, (index) => Category.fromSnapshot(documentSnapshotList[index]));
       } else {
-        return Future.error(DBError.noItems);
+        return Future.error(DBError.noCategory);
       }
     } catch (e) {
       return Future.error(e);
@@ -208,5 +261,8 @@ class DatabaseService {
 }
 
 enum DBError {
-  noItems,
+  noDealer,
+  noProduct,
+  noComment,
+  noCategory,
 }

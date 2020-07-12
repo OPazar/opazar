@@ -3,6 +3,7 @@ import 'package:enhanced_future_builder/enhanced_future_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:opazar/enums/status.dart';
+import 'package:opazar/models/Category.dart';
 import 'package:opazar/screens/dealer_page.dart';
 import 'package:opazar/services/db.dart';
 import 'package:opazar/services/initializer.dart';
@@ -21,13 +22,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var title = 'Tüm Ürünler';
+  var productsFuture = db.getAllProducts();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Tüm Ürünler')),
-      drawer: DrawerBar(),
+      appBar: AppBar(title: Text(title)),
+      drawer: DrawerBar(setCategory: (category) {
+        setState(() {
+          if (category != null) {
+            title = category.name;
+            productsFuture = db.getProductsWithCategory(category.uid);
+          } else {
+            title = 'Tüm Ürünler';
+            productsFuture = db.getAllProducts();
+          }
+          Navigator.pop(context);
+        });
+      }),
       body: EnhancedFutureBuilder(
-        future: db.getAllProducts(),
+        future: productsFuture,
         rememberFutureResult: false,
         whenNotDone: ProductsListView(status: Status.waiting),
         whenDone: (snapshotData) => ProductsListView(dapList: snapshotData, status: Status.done),
@@ -38,6 +53,10 @@ class _HomePageState extends State<HomePage> {
 }
 
 class DrawerBar extends StatelessWidget {
+  final void Function(Category category) setCategory;
+
+  DrawerBar({this.setCategory});
+
   Widget buildDrawerHeader() {
     var user = initializer.currentUser;
     return DrawerHeader(
@@ -90,15 +109,22 @@ class DrawerBar extends StatelessWidget {
 
   Widget buildDrawerContent() {
     var categories = initializer.categories;
+    var categoriesWidget = List.generate(
+        categories.length,
+        (index) => ListTile(
+              title: Text(categories[index].name),
+              onTap: () => setCategory(categories[index]),
+            ));
+    categoriesWidget.insert(
+        0,
+        ListTile(
+          title: Text('Tüm Ürünler'),
+          onTap: () => setCategory(null),
+        ));
     return Expanded(
       child: ListView(
         padding: EdgeInsets.zero,
-        children: List.generate(
-            categories.length,
-            (index) => ListTile(
-                  title: Text(categories[index].name),
-                  onTap: () => null,
-                )),
+        children: categoriesWidget,
       ),
     );
   }

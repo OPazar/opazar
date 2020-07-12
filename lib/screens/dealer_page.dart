@@ -26,13 +26,12 @@ var auth = AuthService();
 class _DealerPageState extends State<DealerPage> {
   @override
   Widget build(BuildContext context) {
-
     var productsBuilder = EnhancedFutureBuilder<List<DaP>>(
-      future: db.getProducts(widget.dealer),
+      future: db.getProducts(dealer: widget.dealer),
       rememberFutureResult: false,
-      whenDone: (snapshotData) => ProductsListView(dapList: snapshotData,status: Status.done),
-      whenNotDone: ProductsListView(dapList: null,status:Status.waiting),
-      whenError: (error) => ProductsListView(dapList: null,status:Status.error),
+      whenDone: (snapshotData) => ProductsListView(dapList: snapshotData, status: Status.done),
+      whenNotDone: ProductsListView(dapList: null, status: Status.waiting),
+      whenError: (error) => ProductsListView(dapList: null, status: Status.error),
     );
 
     return Scaffold(
@@ -95,23 +94,24 @@ class DealerDetails extends StatelessWidget {
     );
 
     var dealerRate = Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      height: 50.0,
+      padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
       child: RawMaterialButton(
         onPressed: () {
           showModalBottomSheet(
-            context: context,
-            builder: (BuildContext bc) {
-              return Column(children: <Widget>[
-                EnhancedFutureBuilder<List<Comment>>(
-                  future: db.getDealerComments(dealer.uid),
-                  rememberFutureResult: true,
-                  whenDone: (snapshotData) => CommentBottomSheet(comments: snapshotData, status: Status.done),
-                  whenNotDone: CommentBottomSheet(status: Status.waiting),
-                  whenError: (error) => CommentBottomSheet(status: Status.error),
-                )
-              ]);
-            });
+              context: context,
+              builder: (BuildContext bc) {
+                return Column(children: <Widget>[
+                  EnhancedFutureBuilder<List<Comment>>(
+                    future: db.getDealerComments(dealer.uid),
+                    rememberFutureResult: true,
+                    whenDone: (snapshotData) => CommentBottomSheet(comments: snapshotData, status: Status.done),
+                    whenNotDone: CommentBottomSheet(status: Status.waiting),
+                    whenError: (error) => CommentBottomSheet(status: Status.error),
+                  )
+                ]);
+              });
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -135,23 +135,10 @@ class DealerDetails extends StatelessWidget {
     );
     return Column(
       children: <Widget>[
-        Container(
-            height: 250.0,
-            width: double.infinity,
-            color: Colors.blue,
-            child: dealerImage),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: dealerName),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: dealerSlogan),
-        Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(8.0),
-            child: dealerRate),
+        Container(height: 250.0, width: double.infinity, color: Colors.blue, child: dealerImage),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerName),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerSlogan),
+        Container(width: double.infinity, padding: EdgeInsets.all(8.0), child: dealerRate),
       ],
     );
   }
@@ -179,8 +166,7 @@ class DealerShowcase extends StatelessWidget {
             ),
           ),
         ),
-        placeholder: (context, url) =>
-            Center(child: CircularProgressIndicator()),
+        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ),
     );
@@ -193,11 +179,8 @@ class DealerShowcase extends StatelessWidget {
       primary: true,
       physics: ScrollPhysics(),
       child: Row(
-        children: List.generate(
-            images.length,
-            (index) => Container(
-                child: gridViewItem(images[index]),
-                padding: EdgeInsets.only(right: 8.0))),
+        children: List.generate(images.length,
+            (index) => Container(child: gridViewItem(images[index]), padding: EdgeInsets.only(right: 8.0))),
       ),
     );
 

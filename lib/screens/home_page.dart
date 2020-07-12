@@ -23,7 +23,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var title = 'Tüm Ürünler';
-  var productsFuture = db.getAllProducts();
+  var productsFuture = db.getProducts();
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +33,10 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           if (category != null) {
             title = category.name;
-            productsFuture = db.getProductsWithCategory(category.uid);
+            productsFuture = db.getProductsWithCategory(category);
           } else {
             title = 'Tüm Ürünler';
-            productsFuture = db.getAllProducts();
+            productsFuture = db.getProducts();
           }
           Navigator.pop(context);
         });

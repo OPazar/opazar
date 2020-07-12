@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Dealer {
-  String get uid => _uid;
-  String _uid;
+  String uid;
 
   String name;
   String imageUrl;
@@ -10,7 +9,7 @@ class Dealer {
   String slogan;
   DocumentReference referance;
 
-  Dealer({uid, this.name, this.imageUrl,this.showcaseImageUrls,this.slogan}) : this._uid = uid;
+  Dealer({this.uid, this.name, this.imageUrl,this.showcaseImageUrls,this.slogan});
 
   factory Dealer.fromMap(Map data) {
     data = data ?? {};

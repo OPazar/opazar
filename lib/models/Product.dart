@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Product {
-  String get uid => _uid;
-  String _uid;
+  String uid;
 
   String name;
   String imageUrl;
   double price;
   String unit;
+  String dealerUid;
   String categoryUid;
   DocumentReference referance;
 
   String get priceText => price.toStringAsFixed(2).replaceAll('.', ',') + ' TL';
 
-  Product({uid, this.name, this.imageUrl, this.price, this.unit, this.categoryUid}) : this._uid = uid;
+  Product({this.uid, this.name, this.imageUrl, this.price, this.unit, this.categoryUid,this.dealerUid});
 
   factory Product.fromMap(Map data) {
     data = data ?? {};
@@ -23,6 +23,7 @@ class Product {
       price: data['price'].toDouble() ?? 0,
       unit: data['unit'] ?? '',
       categoryUid: data['categoryUid'] ?? '',
+      dealerUid: data['dealerUid'] ?? '',
     );
   }
 
@@ -35,6 +36,7 @@ class Product {
       price: data['price'].toDouble() ?? 0,
       unit: data['unit'] ?? '',
       categoryUid: data['categoryUid'] ?? '',
+      dealerUid: data['dealerUid'] ?? '',
     );
   }
 
@@ -45,6 +47,7 @@ class Product {
       'price': price,
       'unit': unit,
       'categoryUid': categoryUid,
+      'dealerUid': dealerUid,
     };
   }
 }

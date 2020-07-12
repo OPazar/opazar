@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
-  String get uid => _uid;
-  String _uid;
+  String uid;
 
   String name;
   String sureName;
@@ -11,7 +10,7 @@ class User {
 
   DocumentReference referance;
 
-  User({uid, this.name, this.sureName, this.imageUrl, this.email}) : this._uid = uid;
+  User({this.uid, this.name, this.sureName, this.imageUrl, this.email});
 
   factory User.fromMap(Map data) {
     data = data ?? {};

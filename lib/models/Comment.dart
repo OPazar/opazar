@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Comment {
-  String get uid => _uid;
-  String _uid;
+  String uid;
 
   String buyerUid;
   String content;
@@ -10,7 +9,7 @@ class Comment {
 
   DocumentReference referance;
 
-  Comment({uid, this.buyerUid, this.content, this.rate}) : this._uid = uid;
+  Comment({this.uid, this.buyerUid, this.content, this.rate});
 
   factory Comment.fromMap(Map data) {
     data = data ?? {};
